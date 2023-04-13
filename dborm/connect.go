@@ -8,7 +8,7 @@ import (
 
 var Db *gorm.DB
 
-type Param struct {
+type Config struct {
 	Type   string
 	Host   string
 	User   string
@@ -17,7 +17,7 @@ type Param struct {
 	Option string
 }
 
-func Connect(args *Param) {
+func Connect(args *Config) {
 
 	config := &gorm.Config{
 		Logger: newLogger(),
@@ -34,7 +34,7 @@ func Connect(args *Param) {
 
 }
 
-func dialector(args *Param) gorm.Dialector {
+func dialector(args *Config) gorm.Dialector {
 
 	switch args.Type {
 	case "sqlite":

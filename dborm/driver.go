@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func useSqlite(args *Param) gorm.Dialector {
+func useSqlite(args *Config) gorm.Dialector {
 
 	name := args.Name
 
@@ -19,7 +19,7 @@ func useSqlite(args *Param) gorm.Dialector {
 
 }
 
-func useMysql(args *Param) gorm.Dialector {
+func useMysql(args *Config) gorm.Dialector {
 
 	host := args.Host
 	user := args.User

@@ -7,26 +7,26 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-type Param struct {
+type Config struct {
 	Level    string
 	Target   string
 	Filename string
 }
 
-func SetDefault(rq *Param) {
+func SetDefault(args *Config) {
 
 	var level slog.Level
 	var handler slog.Handler
 
-	level.UnmarshalText([]byte(rq.Level))
+	level.UnmarshalText([]byte(args.Level))
 
 	opt := slog.HandlerOptions{
 		Level: level,
 	}
 
-	switch rq.Target {
+	switch args.Target {
 	case "file":
-		fw := fileWriter(rq.Filename)
+		fw := fileWriter(args.Filename)
 		handler = opt.NewJSONHandler(fw)
 	case "stdout":
 		handler = opt.NewTextHandler(os.Stdout)
