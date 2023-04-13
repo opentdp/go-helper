@@ -10,9 +10,9 @@ go get -u github.com/open-tdp/go-helper
 
 ## 参考文档
 
-https://pkg.go.dev/github.com/open-tdp/go-helper
+<https://pkg.go.dev/github.com/open-tdp/go-helper>
 
-## 类库解析
+## 模块列表
 
 ```shell
 go-helper
@@ -30,6 +30,7 @@ go-helper
 ├─socket ------------------------------ Socket 服务集成
 ├─strutil ----------------------------- 字符串处理函数
 ├─tencent ----------------------------- 腾讯云接口集成
+├─upgrade ----------------------------- 自更新服务
 └─webssh ------------------------------ WebSSH 集成
 ```
 
