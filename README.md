@@ -8,6 +8,10 @@
 go get -u github.com/open-tdp/go-helper
 ```
 
+## 参考文档
+
+https://pkg.go.dev/github.com/open-tdp/go-helper
+
 ## 类库解析
 
 ```shell
