@@ -37,7 +37,7 @@ func solveEndpoint(rq *ReqeustParam) (string, error) {
 		return endpointData[key], nil
 	}
 
-	return "", errors.New("获取 Endpoint 失败")
+	return "", errors.New("solve endpoint failed")
 
 }
 
@@ -76,7 +76,7 @@ func requestEndpoint(rq *ReqeustParam) (*EndpointItem, error) {
 	if len(data.Endpoints.Endpoint) > 0 {
 		item = &data.Endpoints.Endpoint[0]
 	} else {
-		err = errors.New("获取 Endpoint 失败")
+		err = errors.New("solve endpoint failed")
 	}
 
 	return item, err

@@ -1,14 +1,14 @@
 package certmagic
 
 type ReqeustParam struct {
-	Email       string
-	Domain      string
-	CaType      string
-	Provider    string
-	SecretId    string
-	SecretKey   string
-	EabKeyId    string
-	EabMacKey   string
+	Email       string `noste:"邮箱"`
+	Domain      string `noste:"域名"`
+	CaType      string `noste:"Ca 类型"`
+	Provider    string `noste:"Ca 提供商"`
+	SecretId    string `noste:"密钥 ID"`
+	SecretKey   string `noste:"密钥"`
+	EabKeyId    string `noste:"EAB密钥 ID"`
+	EabMacKey   string `noste:"EAB密钥"`
 	StoragePath string `noste:"存储目录"`
 }
 

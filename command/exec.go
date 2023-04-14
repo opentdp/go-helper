@@ -9,12 +9,12 @@ import (
 )
 
 type ExecPayload struct {
-	Name          string
-	CommandType   string
-	Username      string
-	WorkDirectory string
-	Content       string
-	Timeout       uint
+	Name          string `note:"脚本名称"`
+	CommandType   string `note:"脚本类型 BAT|POWERSHELL|SHELL"`
+	Username      string `note:"执行脚本的用户名"`
+	WorkDirectory string `note:"脚本工作目录"`
+	Content       string `note:"脚本内容"`
+	Timeout       uint   `note:"超时时间"`
 }
 
 func Exec(data *ExecPayload) (string, error) {

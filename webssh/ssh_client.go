@@ -11,10 +11,10 @@ import (
 type AuthModel int8
 
 type SSHClientOption struct {
-	Addr       string
-	User       string
-	Password   string
-	PrivateKey string
+	Addr       string `note:"地址"`
+	User       string `note:"用户名"`
+	Password   string `note:"密码"`
+	PrivateKey string `note:"私钥"`
 }
 
 func NewSSHClient(option *SSHClientOption) (*ssh.Client, error) {

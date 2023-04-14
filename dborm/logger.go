@@ -11,14 +11,14 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type LogWrap struct {
+type Logger struct {
 	config *logger.Config
 	logger *logman.Logger
 }
 
-func newLogger() logger.Interface {
+func NewLogger() logger.Interface {
 
-	logger.Default = &LogWrap{
+	logger.Default = &Logger{
 		logger: logman.Named("gorm"),
 		config: &logger.Config{
 			IgnoreRecordNotFoundError: false,
@@ -30,48 +30,45 @@ func newLogger() logger.Interface {
 
 }
 
-func (lw LogWrap) LogMode(level logger.LogLevel) logger.Interface {
+func (l Logger) LogMode(level logger.LogLevel) logger.Interface {
 
-	lw.config.LogLevel = level
-	return lw
-
-}
-
-func (lw LogWrap) Info(ctx context.Context, msg string, args ...any) {
-
-	msg = fmt.Sprintf(msg, args...)
-	lw.logger.Info(msg)
+	l.config.LogLevel = level
+	return l
 
 }
 
-func (lw LogWrap) Warn(ctx context.Context, msg string, args ...any) {
+func (l Logger) Info(ctx context.Context, msg string, args ...any) {
 
-	msg = fmt.Sprintf(msg, args...)
-	lw.logger.Warn(msg)
-
-}
-
-func (lw LogWrap) Error(ctx context.Context, msg string, args ...any) {
-
-	msg = fmt.Sprintf(msg, args...)
-	lw.logger.Error(msg)
+	l.logger.Info(fmt.Sprintf(msg, args...))
 
 }
 
-func (lw LogWrap) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+func (l Logger) Warn(ctx context.Context, msg string, args ...any) {
 
-	cfg := lw.config
-	sql, rows := fc()
+	l.logger.Warn(fmt.Sprintf(msg, args...))
+
+}
+
+func (l Logger) Error(ctx context.Context, msg string, args ...any) {
+
+	l.logger.Error(fmt.Sprintf(msg, args...))
+
+}
+
+func (l Logger) Trace(ctx context.Context, begin time.Time, fn func() (string, int64), err error) {
+
+	cfg := l.config
+	sql, rows := fn()
 	elapsed := time.Since(begin)
 
 	switch {
 	case err != nil && (!errors.Is(err, gorm.ErrRecordNotFound) || !cfg.IgnoreRecordNotFoundError):
-		lw.logger.Error("trace error", "error", err, "sql", sql, "rows", rows, "elapsed", elapsed)
+		l.logger.Error("trace error", "error", err, "sql", sql, "rows", rows, "elapsed", elapsed)
 	case elapsed > cfg.SlowThreshold && cfg.SlowThreshold != 0:
 		slow := fmt.Sprintf("trace slow sql >= %v", cfg.SlowThreshold)
-		lw.logger.Warn(slow, "sql", sql, "rows", rows, "elapsed", elapsed)
+		l.logger.Warn(slow, "sql", sql, "rows", rows, "elapsed", elapsed)
 	default:
-		lw.logger.Info("trace query", "sql", sql, "rows", rows, "elapsed", elapsed)
+		l.logger.Info("trace query", "sql", sql, "rows", rows, "elapsed", elapsed)
 	}
 
 }

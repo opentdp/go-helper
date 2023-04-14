@@ -48,7 +48,7 @@ func CertDetail(domain string) (*Certificate, error) {
 	magic, ok := magicPool[domain]
 
 	if !ok {
-		return cert, errors.New("任务不存在或已被删除")
+		return cert, errors.New("not exist or deleted")
 	}
 
 	crt, err := magic.CacheManagedCertificate(context.Background(), domain)

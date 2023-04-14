@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"runtime"
 	"time"
@@ -11,7 +11,7 @@ import (
 
 func newScript(code string, ext string) (string, error) {
 
-	tf, err := ioutil.TempFile("", "tdp-*."+ext)
+	tf, err := os.CreateTemp("", "tdp-*."+ext)
 
 	if err != nil {
 		return "", errors.New("创建临时文件失败")

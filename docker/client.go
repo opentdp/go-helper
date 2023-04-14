@@ -12,6 +12,7 @@ func New(ops ...client.Opt) (*DockerClient, error) {
 
 	ops = append(ops, client.WithAPIVersionNegotiation())
 	c, err := client.NewClientWithOpts(ops...)
+
 	return &DockerClient{c}, err
 
 }

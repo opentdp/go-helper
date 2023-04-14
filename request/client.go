@@ -10,11 +10,11 @@ import (
 )
 
 type Client struct {
-	Method  string
-	Url     string
-	Data    string
-	Headers map[string]string
-	Timeout time.Duration
+	Method  string            `note:"请求方法 GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE"`
+	Url     string            `note:"请求地址"`
+	Data    string            `note:"请求数据"`
+	Headers map[string]string `note:"请求头"`
+	Timeout time.Duration     `note:"超时时间"`
 }
 
 func (c *Client) Request() ([]byte, error) {

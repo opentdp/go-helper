@@ -9,25 +9,25 @@ import (
 var Db *gorm.DB
 
 type Config struct {
-	Type   string
-	Host   string
-	User   string
-	Passwd string
-	Name   string
-	Option string
+	Type     string `note:"数据库类型"`
+	Host     string `note:"主机地址"`
+	DbName   string `note:"数据库名称"`
+	User     string `note:"用户名"`
+	Password string `note:"密码"`
+	Option   string `note:"数据库选项"`
 }
 
 func Connect(args *Config) {
 
 	config := &gorm.Config{
-		Logger: newLogger(),
+		Logger: NewLogger(),
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
 	}
 
 	if db, err := gorm.Open(dialector(args), config); err != nil {
-		logman.Fatal("Connect to databse failed", "error", err)
+		logman.Fatal("connect to databse failed", "error", err)
 	} else {
 		Db = db
 	}
@@ -42,7 +42,7 @@ func dialector(args *Config) gorm.Dialector {
 	case "mysql":
 		return useMysql(args)
 	default:
-		logman.Fatal("Database type error", "type", args.Type)
+		logman.Fatal("database type error", "type", args.Type)
 	}
 
 	return nil

@@ -8,8 +8,8 @@ import (
 )
 
 type TcpRelayParam struct {
-	targetAddr string
-	binaryMode bool
+	targetAddr string `note:"目标地址"`
+	binaryMode bool   `note:"二进制模式"`
 }
 
 func TcpRelay(ws *websocket.Conn, rq *TcpRelayParam) error {
