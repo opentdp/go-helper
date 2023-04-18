@@ -43,14 +43,14 @@ func (pod *WsConn) Die(r string) {
 
 func NewWsClient(u, p, o string) (*WsConn, error) {
 
-	logman.Info("Connecting to server", "url", u)
+	logman.Info("connecting to server", "url", u)
 
 	ws, err := websocket.Dial(u, p, o)
 	if err == nil {
 		return &WsConn{ws}, nil
 	}
 
-	logman.Error("Connect failed", "Error", err)
+	logman.Error("connect failed", "error", err)
 	return nil, err
 
 }
