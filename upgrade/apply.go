@@ -24,8 +24,8 @@ func Apply(rq *RequesParam) error {
 	}
 
 	if !strings.HasPrefix(info.BinaryUrl, "https://") {
-		logger.Info("no need to update")
-		return nil
+		logger.Info("no need to update", "info", info)
+		return ErrNoUpdate
 	}
 
 	updater, err := Downloader(info)
