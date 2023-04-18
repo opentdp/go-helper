@@ -11,9 +11,9 @@ var Db *gorm.DB
 type Config struct {
 	Type     string `note:"数据库类型"`
 	Host     string `note:"主机地址"`
-	DbName   string `note:"数据库名称"`
 	User     string `note:"用户名"`
-	Password string `note:"密码"`
+	Password string `note:"用户密码"`
+	DbName   string `note:"数据库名称"`
 	Option   string `note:"数据库选项"`
 }
 

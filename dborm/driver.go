@@ -22,9 +22,9 @@ func useSqlite(args *Config) gorm.Dialector {
 func useMysql(args *Config) gorm.Dialector {
 
 	host := args.Host
-	dbname := args.DbName
 	user := args.User
 	password := args.Password
+	dbname := args.DbName
 	option := args.Option
 
 	if option == "" {
