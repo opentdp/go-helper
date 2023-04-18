@@ -12,13 +12,13 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/libdns/libdns"
+	"github.com/open-tdp/go-helper/logman"
 	"golang.org/x/crypto/acme"
 	"golang.org/x/net/idna"
 )
@@ -28,20 +28,19 @@ type Manager struct {
 	DirectoryUrl           string
 	ExternalAccountBinding *acme.ExternalAccountBinding
 
-	ExtraExtensions []pkix.Extension
+	Cache  Cache
+	Logger *logman.Logger
 
 	DnsProvider interface {
 		libdns.RecordAppender
 		libdns.RecordDeleter
 	}
 
-	Cache Cache
-
-	clientMu sync.Mutex
 	client   *acme.Client
+	clientMu sync.Mutex
 
-	stateMu sync.Mutex
 	state   map[certKey]*certState
+	stateMu sync.Mutex
 }
 
 func (m *Manager) GetCertificate(name string) (*tls.Certificate, error) {
@@ -191,97 +190,97 @@ func (m *Manager) certState(ck certKey) (*certState, error) {
 func (m *Manager) authorizedCert(ctx context.Context, key crypto.Signer, ck certKey) (der [][]byte, leaf *x509.Certificate, err error) {
 
 	req := &x509.CertificateRequest{
-		Subject:         pkix.Name{CommonName: ck.domain},
-		DNSNames:        []string{ck.domain},
-		ExtraExtensions: m.ExtraExtensions,
+		Subject:  pkix.Name{CommonName: ck.domain},
+		DNSNames: []string{ck.domain},
 	}
 	csr, err := x509.CreateCertificateRequest(rand.Reader, req, key)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	m.Logger.Info("create client", "domain", ck.domain)
 	client, err := m.acmeClient(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	order, err := m.authorizedOrder(ctx, ck.domain)
+	m.Logger.Info("authorize order", "domain", ck.domain)
+	order, err := m.authorizedOrder(ctx, ck)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	m.Logger.Info("finalize order", "domain", ck.domain)
 	chain, _, err := client.CreateOrderCert(ctx, order.FinalizeURL, csr, true)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	m.Logger.Info("verify certificate", "domain", ck.domain)
 	leaf, err = validCertificate(ck, chain, key, time.Now())
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return chain, leaf, nil
 
 }
 
-func (m *Manager) authorizedOrder(ctx context.Context, domain string) (*acme.Order, error) {
+func (m *Manager) authorizedOrder(ctx context.Context, ck certKey) (*acme.Order, error) {
 
-	o, err := m.client.AuthorizeOrder(ctx, acme.DomainIDs(domain))
+	order, err := m.client.AuthorizeOrder(ctx, acme.DomainIDs(ck.domain))
 	if err != nil {
 		return nil, err
 	}
 
-	defer func(urls []string) {
-		go m.revokePendingAuthz(urls)
-	}(o.AuthzURLs)
+	defer func() { go m.revokePendingAuthz(order.AuthzURLs) }()
 
-	switch o.Status {
-	case acme.StatusReady:
-		return o, nil
-	case acme.StatusPending:
-	default:
-		return nil, fmt.Errorf("invalid new order status %q; order URL: %q", o.Status, o.URI)
+	if order.Status == acme.StatusReady {
+		return order, nil
+	}
+	if order.Status != acme.StatusPending {
+		return nil, errors.New("invalid new order status " + order.Status)
 	}
 
-	for _, zurl := range o.AuthzURLs {
-		z, err := m.client.GetAuthorization(ctx, zurl)
+	for _, zurl := range order.AuthzURLs {
+		m.Logger.Info("authorizing domain", "domain", ck.domain, "authz_url", zurl)
+
+		authz, err := m.client.GetAuthorization(ctx, zurl)
 		if err != nil {
 			return nil, err
 		}
-		if z.Status != acme.StatusPending {
+		if authz.Status != acme.StatusPending {
 			continue
 		}
 
 		var chal *acme.Challenge
-		for _, c := range z.Challenges {
+		for _, c := range authz.Challenges {
 			if c.Type == "dns-01" {
 				chal = c
 				break
 			}
 		}
 		if chal == nil {
-			return nil, fmt.Errorf("unable to satisfy %q for domain %q: no viable challenge type found", z.URI, domain)
+			return nil, errors.New("no viable challenge type found")
 		}
 
-		cleanup, err := m.fulfill(ctx, chal, domain)
-		if err != nil {
+		if cleanup, err := m.fulfill(ctx, chal, ck.domain); err != nil {
 			return nil, err
+		} else {
+			defer cleanup()
 		}
-		defer cleanup()
 
 		if _, err := m.client.Accept(ctx, chal); err != nil {
 			return nil, err
 		}
 
-		if _, err := m.client.WaitAuthorization(ctx, z.URI); err != nil {
+		m.Logger.Info("waiting for authorization to be valid", "uri", authz.URI)
+		if _, err := m.client.WaitAuthorization(ctx, authz.URI); err != nil {
 			return nil, err
 		}
 	}
 
-	o, err = m.client.WaitOrder(ctx, o.URI)
-	if err != nil {
-		return nil, err
-	}
-	return o, nil
+	return m.client.WaitOrder(ctx, order.URI)
 
 }
 
@@ -291,8 +290,8 @@ func (m *Manager) revokePendingAuthz(uri []string) {
 	defer cancel()
 
 	for _, u := range uri {
-		z, err := m.client.GetAuthorization(ctx, u)
-		if err == nil && z.Status == acme.StatusPending {
+		authz, err := m.client.GetAuthorization(ctx, u)
+		if err == nil && authz.Status == acme.StatusPending {
 			m.client.RevokeAuthorization(ctx, u)
 		}
 	}
@@ -314,12 +313,12 @@ func (m *Manager) fulfill(ctx context.Context, chal *acme.Challenge, domain stri
 		return nil, err
 	}
 
-	cleanup := func() {
-		go m.DnsProvider.DeleteRecords(ctx, domain, record)
-	}
-
+	m.Logger.Info("wait 30 seconds for dns to take effect")
 	time.Sleep(30 * time.Second)
-	return cleanup, nil
+
+	return func() {
+		go m.DnsProvider.DeleteRecords(ctx, domain, record)
+	}, nil
 
 }
 
