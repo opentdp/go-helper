@@ -13,7 +13,7 @@ import (
 
 func Apply(rq *RequesParam) error {
 
-	logger := logman.Named("updater")
+	logger := logman.Named("upgrade")
 
 	logger.Info(
 		"checking update",
