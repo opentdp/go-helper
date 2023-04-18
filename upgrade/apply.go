@@ -39,6 +39,9 @@ func Apply(rq *RequesParam) error {
 	err = selfupdate.Apply(updater, selfupdate.Options{})
 	if err != nil {
 		logger.Error("apply update failed", "error", err)
+		if selfupdate.RollbackError(err) != nil {
+			logger.Error("failed to rollback from bad update")
+		}
 		return err
 	}
 
