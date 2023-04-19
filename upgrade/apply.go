@@ -18,21 +18,21 @@ func Apply(rq *RequesParam) error {
 	logger.Info(
 		"checking update",
 		"version", rq.Version,
-		"url", rq.UpdateUrl,
+		"url", rq.Server,
 	)
 
-	info, err := CheckVersion(rq)
+	resp, err := CheckVersion(rq)
 	if err != nil {
 		logger.Error("check update failed", "error", err)
 		return err
 	}
 
-	if !strings.HasPrefix(info.BinaryUrl, "https://") {
-		logger.Info("no need to update", "info", info)
+	if !strings.HasPrefix(resp.Package, "https://") {
+		logger.Info("no need to update", "resp", resp)
 		return ErrNoUpdate
 	}
 
-	updater, err := Downloader(info)
+	updater, err := Downloader(resp)
 	if err != nil {
 		logger.Error("prepare updater failed", "error", err)
 		return err

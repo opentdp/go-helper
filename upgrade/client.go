@@ -17,25 +17,25 @@ func CheckVersion(rq *RequesParam) (*UpdateInfo, error) {
 
 	info := &UpdateInfo{}
 
-	body, err := request.TextGet(rq.UpdateUrl, request.H{
-		"app-version":      rq.Version,
-		"app-runtime-os":   runtime.GOOS,
-		"app-runtime-arch": runtime.GOARCH,
-	})
+	url := rq.Server
+	url += "?ver=" + rq.Version
+	url += "&os=" + runtime.GOOS
+	url += "&arch=" + runtime.GOARCH
+	body, err := request.Get(url, request.H{})
 
 	if err != nil {
 		return info, err
 	}
 
-	err = json.Unmarshal([]byte(body), &info)
+	err = json.Unmarshal(body, &info)
 
 	if err != nil {
 		return info, err
 	}
-	if info.Message != "" {
-		return info, errors.New(info.Message)
+	if info.Error != "" {
+		return info, errors.New(info.Error)
 	}
-	if info.BinaryUrl == "" {
+	if info.Package == "" {
 		return info, errors.New("get package url failed")
 	}
 
@@ -45,7 +45,7 @@ func CheckVersion(rq *RequesParam) (*UpdateInfo, error) {
 
 func Downloader(rq *UpdateInfo) (io.ReadCloser, error) {
 
-	resp, err := http.Get(rq.BinaryUrl)
+	resp, err := http.Get(rq.Package)
 
 	if err != nil {
 		return nil, fmt.Errorf("get package failed (%s)", err)
@@ -56,7 +56,7 @@ func Downloader(rq *UpdateInfo) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("get package failed (http status %d)", resp.StatusCode)
 	}
 
-	if strings.HasSuffix(rq.BinaryUrl, ".gz") && resp.Header.Get("Content-Encoding") != "gzip" {
+	if strings.HasSuffix(rq.Package, ".gz") && resp.Header.Get("Content-Encoding") != "gzip" {
 		return gzip.NewReader(resp.Body)
 	}
 
