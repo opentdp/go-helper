@@ -13,7 +13,7 @@ var config = &Config{}
 
 type Config struct {
 	Level    string `note:"日志级别"`
-	Target   string `note:"日志输出设备 file/stdout/stderr"`
+	Target   string `note:"日志输出设备 both|file|stdout|stderr"`
 	Storage  string `note:"日志文件存储目录"`
 	Filename string `note:"默认日志文件名"`
 }

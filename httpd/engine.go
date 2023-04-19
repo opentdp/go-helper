@@ -18,15 +18,9 @@ func Engine(debug bool) *gin.Engine {
 	gin.DefaultWriter = logman.AutoWriter("gin-access")
 	gin.DefaultErrorWriter = logman.AutoWriter("gin-error")
 
-	// 初始化
-	return gin.Default()
-
-}
-
-func init() {
-
-	// 重写文件类型
 	mime.AddExtensionType(".css", "text/css; charset=utf-8")
 	mime.AddExtensionType(".js", "text/javascript; charset=utf-8")
+
+	return gin.Default()
 
 }
