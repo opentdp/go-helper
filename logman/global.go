@@ -1,6 +1,7 @@
 package logman
 
 import (
+	"io"
 	"os"
 	"path"
 
@@ -34,21 +35,29 @@ func NewLogger(name string) *slog.Logger {
 
 	level.UnmarshalText([]byte(config.Level))
 
-	hopt := slog.HandlerOptions{
+	option := slog.HandlerOptions{
 		Level: level,
 	}
 
-	switch config.Target {
-	case "file":
-		fw := FileWriter(name)
-		handler = hopt.NewJSONHandler(fw)
-	case "stdout":
-		handler = hopt.NewTextHandler(os.Stdout)
-	default:
-		handler = hopt.NewTextHandler(os.Stderr)
-	}
+	writer := AutoWriter(name)
+	handler = option.NewTextHandler(writer)
 
 	return slog.New(handler)
+
+}
+
+func AutoWriter(name string) io.Writer {
+
+	switch config.Target {
+	case "file":
+		return FileWriter(name)
+	case "both":
+		return io.MultiWriter(os.Stdout, FileWriter(name))
+	case "stderr":
+		return os.Stderr
+	default:
+		return os.Stdout
+	}
 
 }
 
