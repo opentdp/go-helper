@@ -32,7 +32,7 @@ func Apply(rq *RequesParam) error {
 		return ErrNoUpdate
 	}
 
-	updater, err := Downloader(resp)
+	updater, err := Downloader(resp.Package)
 	if err != nil {
 		logger.Error("prepare updater failed", "error", err)
 		return err

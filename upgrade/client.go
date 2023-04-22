@@ -43,9 +43,9 @@ func CheckVersion(rq *RequesParam) (*UpdateInfo, error) {
 
 }
 
-func Downloader(rq *UpdateInfo) (io.ReadCloser, error) {
+func Downloader(url string) (io.ReadCloser, error) {
 
-	resp, err := http.Get(rq.Package)
+	resp, err := http.Get(url)
 
 	if err != nil {
 		return nil, fmt.Errorf("get package failed (%s)", err)
@@ -56,7 +56,7 @@ func Downloader(rq *UpdateInfo) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("get package failed (http status %d)", resp.StatusCode)
 	}
 
-	if strings.HasSuffix(rq.Package, ".gz") && resp.Header.Get("Content-Encoding") != "gzip" {
+	if strings.HasSuffix(url, ".gz") && resp.Header.Get("Content-Encoding") != "gzip" {
 		return gzip.NewReader(resp.Body)
 	}
 
