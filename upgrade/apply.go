@@ -7,7 +7,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/minio/selfupdate"
 	"github.com/open-tdp/go-helper/logman"
 )
 
@@ -34,16 +33,22 @@ func Apply(rq *RequesParam) error {
 
 	updater, err := Downloader(resp.Package)
 	if err != nil {
-		logger.Error("prepare updater failed", "error", err)
+		logger.Error("download binary failed", "error", err)
 		return err
 	}
 
 	defer updater.Close()
 
-	err = selfupdate.Apply(updater, selfupdate.Options{})
-	if err != nil {
+	opts := Options{}
+
+	if err = PrepareBinary(updater, opts); err != nil {
+		logger.Error("prepare binary failed", "error", err)
+		return err
+	}
+
+	if err = CommitBinary(opts); err != nil {
 		logger.Error("apply update failed", "error", err)
-		if selfupdate.RollbackError(err) != nil {
+		if RollbackError(err) != nil {
 			logger.Error("failed to rollback from bad update")
 		}
 		return err

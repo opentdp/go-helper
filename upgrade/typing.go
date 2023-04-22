@@ -18,4 +18,9 @@ type UpdateInfo struct {
 	Package string `note:"下载地址"`
 }
 
+type ErrRollback struct {
+	error             // original error
+	rollbackErr error // error encountered while rolling back
+}
+
 var ErrNoUpdate = errors.New("no update")

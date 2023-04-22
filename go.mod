@@ -17,7 +17,6 @@ require (
 	github.com/libdns/libdns v0.2.1
 	github.com/libdns/tencentcloud v1.0.0
 	github.com/mholt/acmez v1.1.0
-	github.com/minio/selfupdate v0.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/shirou/gopsutil/v3 v3.23.3
@@ -33,7 +32,6 @@ require (
 )
 
 require (
-	aead.dev/minisign v0.2.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
 	github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 // indirect
