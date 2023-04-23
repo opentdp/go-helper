@@ -45,11 +45,11 @@ func DownloadWithProgress(url string) (string, error) {
 		n, err := io.ReadFull(resp.Body, buf)
 		if err != nil && err != io.ErrUnexpectedEOF && err != io.EOF {
 			return "", err
+		} else {
+			downloaded += int64(n)
 		}
-		downloaded += int64(n)
 
-		_, err = tempFile.Write(buf[:n])
-		if err != nil {
+		if _, err := tempFile.Write(buf[:n]); err != nil {
 			return "", err
 		}
 
