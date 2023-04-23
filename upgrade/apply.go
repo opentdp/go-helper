@@ -74,11 +74,10 @@ func Restart() error {
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		cmd.Env = env
-		err := cmd.Start()
-		if err == nil {
-			os.Exit(0)
+		if err = cmd.Start(); err != nil {
+			return err
 		}
-		return err
+		os.Exit(0)
 	}
 
 	// Other OS

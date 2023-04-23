@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"crypto"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Options struct {
@@ -23,45 +23,24 @@ type Options struct {
 	// Use this hash function to generate the checksum. If not set, SHA256 is used.
 	Hash crypto.Hash
 
-	// Store the old executable file at this path after a successful update.
-	// The empty string means the old executable file will be removed after the update.
-	OldSavePath string
-}
-
-// CheckPermissions determines whether the process has the correct permissions to
-// perform the requested update. If the update can proceed, it returns nil, otherwise
-// it returns the error that would occur if an update were attempted.
-func (o *Options) CheckPermissions() error {
-
-	// get the directory the file exists in
-	path, err := o.getPath()
-	if err != nil {
-		return err
-	}
-
-	fileDir := filepath.Dir(path)
-	fileName := filepath.Base(path)
-
-	// attempt to open a file in the file's directory
-	newPath := filepath.Join(fileDir, fmt.Sprintf(".%s.check-perm", fileName))
-	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, o.getMode())
-	if err != nil {
-		return err
-	}
-	fp.Close()
-
-	_ = os.Remove(newPath)
-	return nil
-
+	// Use to mark the temporary file.
+	time string
 }
 
 func (o *Options) getPath() (string, error) {
 
 	if o.TargetPath == "" {
-		return executable()
-	} else {
-		return o.TargetPath, nil
+		if p, err := os.Executable(); err == nil {
+			if p, err = filepath.Abs(p); err == nil {
+				o.TargetPath = p
+			}
+			return "", err
+		} else {
+			return "", err
+		}
 	}
+
+	return o.TargetPath, nil
 
 }
 
@@ -74,50 +53,34 @@ func (o *Options) getMode() os.FileMode {
 
 }
 
-func (o *Options) getHash() crypto.Hash {
+func (o *Options) getTimeString() string {
 
-	if o.Hash == 0 {
-		o.Hash = crypto.SHA256
+	if o.time == "" {
+		o.time = time.Now().Format("20060102150405")
 	}
-	return o.Hash
+	return o.time
 
 }
 
-func (o *Options) verifyChecksum(updated []byte) error {
+func (o *Options) verifyChecksum(payload []byte) error {
 
-	checksum, err := checksumFor(o.getHash(), updated)
-	if err != nil {
-		return err
+	h := o.Hash
+	if h == 0 {
+		h = crypto.SHA256
 	}
+
+	if !h.Available() {
+		return errors.New("requested hash function not available")
+	}
+
+	hash := h.New()
+	hash.Write(payload) // guaranteed not to error
+	checksum := hash.Sum([]byte{})
 
 	if !bytes.Equal(o.Checksum, checksum) {
 		return errors.New("updated file has wrong checksum")
 	}
 
 	return nil
-
-}
-
-func checksumFor(h crypto.Hash, payload []byte) ([]byte, error) {
-
-	if !h.Available() {
-		return nil, errors.New("requested hash function not available")
-	}
-
-	hash := h.New()
-	hash.Write(payload) // guaranteed not to error
-
-	return hash.Sum([]byte{}), nil
-
-}
-
-func executable() (string, error) {
-
-	ex, err := os.Executable()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Abs(ex)
 
 }

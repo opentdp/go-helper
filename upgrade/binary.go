@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -24,17 +23,17 @@ func CheckVersion(rq *RequesParam) (*UpdateInfo, error) {
 	url += "?ver=" + rq.Version
 	url += "&os=" + runtime.GOOS
 	url += "&arch=" + runtime.GOARCH
-	body, err := request.Get(url, request.H{})
 
+	body, err := request.Get(url, request.H{})
 	if err != nil {
 		return info, err
 	}
 
 	err = json.Unmarshal(body, &info)
-
 	if err != nil {
 		return info, err
 	}
+
 	if info.Error != "" {
 		return info, errors.New(info.Error)
 	}
@@ -67,11 +66,10 @@ func Downloader(url string) (io.ReadCloser, error) {
 
 }
 
-// PrepareBinary reads the new binary content from io.Reader and performs the following actions:
-//  1. If configured, applies the contents of the update io.Reader as a binary patch.
-//  2. If configured, computes the checksum of the executable and verifies it matches.
-//  3. If configured, verifies the signature with a public key.
-//  4. Creates a new file, /path/to/.target.new with the TargetMode with the contents of the updated file
+// reads the new binary content from io.Reader and performs the following actions:
+//  If configured, applies the contents of the update io.Reader as a binary patch.
+//  If configured, computes the checksum of the executable and verifies it matches.
+//  Creates a new file with the TargetMode with the contents of the updated file
 
 func PrepareBinary(update io.Reader, opts Options) error {
 
@@ -95,12 +93,8 @@ func PrepareBinary(update io.Reader, opts Options) error {
 		}
 	}
 
-	// get the directory the executable exists in
-	updateDir := filepath.Dir(targetPath)
-	filename := filepath.Base(targetPath)
-
 	// Copy the contents of newbinary to a new executable file
-	newPath := filepath.Join(updateDir, fmt.Sprintf(".%s.new", filename))
+	newPath := targetPath + "-new" + opts.getTimeString()
 	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, opts.getMode())
 	if err != nil {
 		return err
@@ -109,32 +103,11 @@ func PrepareBinary(update io.Reader, opts Options) error {
 	defer fp.Close()
 
 	_, err = io.Copy(fp, bytes.NewReader(newBytes))
-	if err != nil {
-		return err
-	}
-
-	// if we don't call fp.Close(), windows won't let us move the new executable
-	// because the file will still be "in use"
-	fp.Close()
-
-	return nil
+	return err
 
 }
 
-// CommitBinary moves the new executable to the location of the current executable or opts.TargetPath
-// if specified. It performs the following operations:
-//  1. Renames /path/to/target to /path/to/.target.old
-//  2. Renames /path/to/.target.new to /path/to/target
-//  3. If the final rename is successful, deletes /path/to/.target.old, returns no error. On Windows,
-//     the removal of /path/to/target.old always fails, so instead Apply hides the old file instead.
-//  4. If the final rename fails, attempts to roll back by renaming /path/to/.target.old
-//     back to /path/to/target.
-//
-// If the roll back operation fails, the file system is left in an inconsistent state where there is
-// no new executable file and the old executable file could not be be moved to its original location.
-// In this case you should notify the user of the bad news and ask them to recover manually. Applications
-// can determine whether the rollback failed by calling RollbackError, see the documentation on that function
-// for additional detail.
+// moves the new executable to the location of the current executable or opts.TargetPath
 
 func CommitBinary(opts Options) error {
 
@@ -144,62 +117,31 @@ func CommitBinary(opts Options) error {
 		return err
 	}
 
-	updateDir := filepath.Dir(targetPath)
-	filename := filepath.Base(targetPath)
-	newPath := filepath.Join(updateDir, fmt.Sprintf(".%s.new", filename))
-
-	// this is where we'll move the executable to so that we can swap in the updated replacement
-	oldPath := opts.OldSavePath
-	removeOld := opts.OldSavePath == ""
-	if removeOld {
-		oldPath = filepath.Join(updateDir, fmt.Sprintf(".%s.old", filename))
-	}
-
-	// delete any existing old exec file - this is necessary on Windows for two reasons:
-	// 1. after a successful update, Windows can't remove the .old file because the process is still running
-	// 2. windows rename operations fail if the destination file already exists
-	_ = os.Remove(oldPath)
+	newPath := targetPath + "-new" + opts.getTimeString()
+	oldPath := targetPath + "-old" + opts.getTimeString()
 
 	// move the existing executable to a new file in the same directory
-	err = os.Rename(targetPath, oldPath)
-	if err != nil {
+	if err = os.Rename(targetPath, oldPath); err != nil {
 		return err
 	}
 
 	// move the new exectuable in to become the new program
-	err = os.Rename(newPath, targetPath)
-
-	if err != nil {
-		// move unsuccessful
-		//
-		// The filesystem is now in a bad state. We have successfully
-		// moved the existing binary to a new location, but we couldn't move the new
-		// binary to take its place. That means there is no file where the current executable binary
-		// used to be!
+	if err = os.Rename(newPath, targetPath); err != nil {
 		// Try to rollback by restoring the old binary to its original path.
-		rerr := os.Rename(oldPath, targetPath)
-		if rerr != nil {
-			return &ErrRollback{err, rerr}
+		if er2 := os.Rename(oldPath, targetPath); er2 != nil {
+			return &ErrRollback{err, er2}
 		}
-
 		return err
 	}
 
-	// move successful, remove the old binary if needed
-	if removeOld {
-		os.Remove(oldPath)
-	}
+	// try to remove the old binary if needed
+	os.Remove(oldPath)
 
 	return nil
 
 }
 
-// RollbackError takes an error value returned by Apply and returns the error, if any,
-// that occurred when attempting to roll back from a failed update. Applications should
-// always call this function on any non-nil errors returned by Apply.
-//
-// If no rollback was needed or if the rollback was successful, RollbackError returns nil,
-// otherwise it returns the error encountered when trying to roll back.
+// takes an error value returned by Apply and returns the error
 
 func RollbackError(err error) error {
 
