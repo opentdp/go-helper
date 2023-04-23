@@ -5,7 +5,6 @@ import (
 	"crypto"
 	"errors"
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -30,14 +29,11 @@ type Options struct {
 func (o *Options) getPath() (string, error) {
 
 	if o.TargetPath == "" {
-		if p, err := os.Executable(); err == nil {
-			if p, err = filepath.Abs(p); err == nil {
-				o.TargetPath = p
-			}
-			return "", err
-		} else {
+		p, err := os.Executable()
+		if err != nil {
 			return "", err
 		}
+		o.TargetPath = p
 	}
 
 	return o.TargetPath, nil
