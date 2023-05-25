@@ -10,7 +10,6 @@ require (
 	github.com/caddyserver/certmagic v0.17.2
 	github.com/docker/docker v24.0.1+incompatible
 	github.com/forgoer/openssl v1.6.0
-	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/glebarez/sqlite v1.8.0
 	github.com/libdns/alidns v1.0.2
