@@ -4,27 +4,63 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+	"path"
+	"strings"
 
-	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
 )
 
-func Static(urlPrefix, dir string) {
+func Static(urlPrefix, root string) {
 
-	lf := static.LocalFile(dir, false)
-	engine.Use(static.Serve(urlPrefix, lf))
-
-}
-
-func StaticIndex(urlPrefix, dir string) {
-
-	lf := static.LocalFile(dir, true)
-	engine.Use(static.Serve(urlPrefix, lf))
+	hfs := gin.Dir(root, false)
+	engine.Use(StaticServe(urlPrefix, hfs))
 
 }
 
-func StaticEmbed(urlPrefix, dir string, efs *embed.FS) {
+func StaticIndex(urlPrefix, root string) {
 
-	ui, _ := fs.Sub(efs, dir)
-	engine.StaticFS(urlPrefix, http.FS(ui))
+	hfs := gin.Dir(root, true)
+	engine.Use(StaticServe(urlPrefix, hfs))
+
+}
+
+func StaticEmbed(urlPrefix, sub string, efs *embed.FS) {
+
+	var hfs http.FileSystem
+
+	if sub == "" {
+		hfs = http.FS(efs)
+	} else {
+		eb, _ := fs.Sub(efs, sub)
+		hfs = http.FS(eb)
+	}
+
+	engine.Use(StaticServe(urlPrefix, hfs))
+
+}
+
+func StaticServe(urlPrefix string, hfs http.FileSystem) gin.HandlerFunc {
+
+	fileserver := http.FileServer(hfs)
+	if urlPrefix != "" {
+		fileserver = http.StripPrefix(urlPrefix, fileserver)
+	}
+
+	isExists := func(prefix, filepath string) bool {
+		if p := strings.TrimPrefix(filepath, prefix); len(p) < len(filepath) {
+			if f, err := hfs.Open(path.Join("/", p)); err == nil {
+				defer f.Close()
+				return true
+			}
+		}
+		return false
+	}
+
+	return func(c *gin.Context) {
+		if isExists(urlPrefix, c.Request.URL.Path) {
+			fileserver.ServeHTTP(c.Writer, c.Request)
+			c.Abort()
+		}
+	}
 
 }
