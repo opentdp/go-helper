@@ -35,12 +35,12 @@ func NewLogger(name string) *slog.Logger {
 
 	level.UnmarshalText([]byte(config.Level))
 
-	option := slog.HandlerOptions{
+	option := &slog.HandlerOptions{
 		Level: level,
 	}
 
 	writer := AutoWriter(name)
-	handler = option.NewTextHandler(writer)
+	handler = slog.NewTextHandler(writer, option)
 
 	return slog.New(handler)
 
