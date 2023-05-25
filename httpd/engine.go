@@ -7,6 +7,8 @@ import (
 	"github.com/open-tdp/go-helper/logman"
 )
 
+var engine *gin.Engine
+
 func Engine(debug bool) *gin.Engine {
 
 	if debug {
@@ -21,6 +23,8 @@ func Engine(debug bool) *gin.Engine {
 	mime.AddExtensionType(".css", "text/css; charset=utf-8")
 	mime.AddExtensionType(".js", "text/javascript; charset=utf-8")
 
-	return gin.Default()
+	engine = gin.Default()
+
+	return engine
 
 }
