@@ -71,7 +71,7 @@ func Downloader(url string) (io.ReadCloser, error) {
 //  If configured, computes the checksum of the executable and verifies it matches.
 //  Creates a new file with the TargetMode with the contents of the updated file
 
-func PrepareBinary(update io.Reader, opts Options) error {
+func PrepareBinary(update io.Reader, opts *Options) error {
 
 	// get target path
 	targetPath, err := opts.getPath()
@@ -109,7 +109,7 @@ func PrepareBinary(update io.Reader, opts Options) error {
 
 // moves the new executable to the location of the current executable or opts.TargetPath
 
-func CommitBinary(opts Options) error {
+func CommitBinary(opts *Options) error {
 
 	// get the directory the file exists in
 	targetPath, err := opts.getPath()

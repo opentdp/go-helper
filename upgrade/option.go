@@ -45,6 +45,7 @@ func (o *Options) getMode() os.FileMode {
 	if o.TargetMode == 0 {
 		return 0755
 	}
+
 	return o.TargetMode
 
 }
@@ -54,6 +55,7 @@ func (o *Options) getTimeString() string {
 	if o.time == "" {
 		o.time = time.Now().Format("20060102150405")
 	}
+
 	return o.time
 
 }

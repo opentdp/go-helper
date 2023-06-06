@@ -31,6 +31,8 @@ func Apply(rq *RequesParam) error {
 		return ErrNoUpdate
 	}
 
+	// download binary
+
 	updater, err := Downloader(resp.Package)
 	if err != nil {
 		logger.Error("download binary failed", "error", err)
@@ -39,7 +41,9 @@ func Apply(rq *RequesParam) error {
 
 	defer updater.Close()
 
-	opts := Options{}
+	// apply binary update
+
+	opts := &Options{}
 
 	if err = PrepareBinary(updater, opts); err != nil {
 		logger.Error("prepare binary failed", "error", err)
