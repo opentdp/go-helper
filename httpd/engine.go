@@ -4,7 +4,7 @@ import (
 	"mime"
 
 	"github.com/gin-gonic/gin"
-	"github.com/open-tdp/go-helper/logman"
+	"github.com/opentdp/go-helper/logman"
 )
 
 var engine *gin.Engine

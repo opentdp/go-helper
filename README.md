@@ -5,12 +5,12 @@
 ## 使用方法
 
 ```shell
-go get -u github.com/open-tdp/go-helper
+go get -u github.com/opentdp/go-helper
 ```
 
 ## 参考文档
 
-<https://pkg.go.dev/github.com/open-tdp/go-helper>
+<https://pkg.go.dev/github.com/opentdp/go-helper>
 
 ## 模块列表
 

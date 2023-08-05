@@ -3,7 +3,7 @@ package socket
 import (
 	"golang.org/x/net/websocket"
 
-	"github.com/open-tdp/go-helper/logman"
+	"github.com/opentdp/go-helper/logman"
 )
 
 type WsConn struct {

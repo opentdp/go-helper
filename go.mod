@@ -1,4 +1,4 @@
-module github.com/open-tdp/go-helper
+module github.com/opentdp/go-helper
 
 go 1.20
 

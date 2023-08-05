@@ -1,7 +1,7 @@
 package dborm
 
 import (
-	"github.com/open-tdp/go-helper/logman"
+	"github.com/opentdp/go-helper/logman"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )

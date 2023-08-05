@@ -6,7 +6,7 @@ import (
 
 	"github.com/caddyserver/certmagic"
 
-	"github.com/open-tdp/go-helper/logman"
+	"github.com/opentdp/go-helper/logman"
 )
 
 var CertEvent func(evt string, data map[string]any)

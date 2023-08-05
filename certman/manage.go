@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/libdns/libdns"
-	"github.com/open-tdp/go-helper/logman"
+	"github.com/opentdp/go-helper/logman"
 	"golang.org/x/crypto/acme"
 	"golang.org/x/net/idna"
 )
