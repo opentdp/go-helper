@@ -36,4 +36,4 @@ go-helper
 
 ## 其他
 
-Copyright (c) 2022 - 2023 Open TDP
+Copyright (c) 2022 - 2023 OpenTDP
