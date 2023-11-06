@@ -22,9 +22,8 @@ func Server(addr string) {
 
 	// 以协程方式启用监听，防止阻塞后续的中断信号处理
 	go func() {
-		if err := server.ListenAndServe(); err == nil {
-			logman.Warn("server started", "address", addr)
-		} else {
+		logman.Warn("server starting", "address", addr)
+		if err := server.ListenAndServe(); err != nil {
 			logman.Fatal("server start failed", "error", err)
 		}
 	}()
