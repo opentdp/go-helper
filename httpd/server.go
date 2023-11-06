@@ -16,8 +16,8 @@ func Server(addr string) {
 	server := &http.Server{
 		Addr:         addr,
 		Handler:      engine,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  300 * time.Second,
+		WriteTimeout: 300 * time.Second,
 	}
 
 	// 以协程方式启用监听，防止阻塞后续的中断信号处理
