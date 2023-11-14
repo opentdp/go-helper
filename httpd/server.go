@@ -22,7 +22,7 @@ func Server(addr string) {
 
 	// 以协程方式启用监听，防止阻塞后续的中断信号处理
 	go func() {
-		logman.Info("server starting", "address", addr)
+		logman.Info("httpd starting", "address", addr)
 		if err := server.ListenAndServe(); err != nil {
 			logman.Fatal(err.Error())
 		}
@@ -37,7 +37,7 @@ func Server(addr string) {
 	// 等待信号，如果没有则保持阻塞
 	<-quit
 
-	logman.Warn("server exiting...")
+	logman.Warn("httpd exiting...")
 
 	// 创建一个剩余5秒超时的上下文
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -45,10 +45,10 @@ func Server(addr string) {
 
 	// 优雅地关闭服务器而不中断任何活动连接
 	if err := server.Shutdown(ctx); err != nil {
-		logman.Fatal("server forced to shutdown", "error", err)
+		logman.Fatal("httpd forced to shutdown", "error", err)
 	}
 
-	logman.Info("server exited")
+	logman.Info("httpd exited")
 	os.Exit(0)
 
 }
