@@ -22,10 +22,12 @@ func Server(addr string) {
 
 	// 以协程方式启用监听，防止阻塞后续的中断信号处理
 	go func() {
-		logman.Warn("server starting", "address", addr)
+		logman.Info("server starting", "address", addr)
 		if err := server.ListenAndServe(); err != nil {
-			logman.Fatal("server start failed", "error", err)
+			logman.Warn("server terminated", "error", err)
 		}
+		logman.Info("server exited")
+		os.Exit(0)
 	}()
 
 	// 创建监听中断信号通道
@@ -37,7 +39,7 @@ func Server(addr string) {
 	// 等待信号，如果没有则保持阻塞
 	<-quit
 
-	logman.Warn("server closing...")
+	logman.Warn("server exiting...")
 
 	// 创建一个剩余5秒超时的上下文
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -47,7 +49,5 @@ func Server(addr string) {
 	if err := server.Shutdown(ctx); err != nil {
 		logman.Fatal("server forced to shutdown", "error", err)
 	}
-
-	logman.Warn("server exiting...")
 
 }
