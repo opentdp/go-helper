@@ -24,10 +24,8 @@ func Server(addr string) {
 	go func() {
 		logman.Info("server starting", "address", addr)
 		if err := server.ListenAndServe(); err != nil {
-			logman.Warn("server terminated", "error", err)
+			logman.Fatal(err.Error())
 		}
-		logman.Info("server exited")
-		os.Exit(0)
 	}()
 
 	// 创建监听中断信号通道
@@ -49,5 +47,8 @@ func Server(addr string) {
 	if err := server.Shutdown(ctx); err != nil {
 		logman.Fatal("server forced to shutdown", "error", err)
 	}
+
+	logman.Info("server exited")
+	os.Exit(0)
 
 }
