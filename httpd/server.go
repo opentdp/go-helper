@@ -9,6 +9,8 @@ import (
 	"github.com/opentdp/go-helper/onquit"
 )
 
+var server *http.Server
+
 func Server(addr string, options ...any) {
 
 	if engine == nil {
@@ -19,7 +21,7 @@ func Server(addr string, options ...any) {
 		}
 	}
 
-	server := &http.Server{
+	server = &http.Server{
 		Addr:         addr,
 		Handler:      engine,
 		ReadTimeout:  300 * time.Second,
