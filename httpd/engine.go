@@ -29,3 +29,15 @@ func Engine(debug bool) *gin.Engine {
 	return engine
 
 }
+
+func Group(relativePath string, handlers ...gin.HandlerFunc) *gin.RouterGroup {
+
+	return engine.Group(relativePath, handlers...)
+
+}
+
+func Use(middleware ...gin.HandlerFunc) gin.IRoutes {
+
+	return engine.Use(middleware...)
+
+}

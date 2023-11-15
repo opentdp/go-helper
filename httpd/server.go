@@ -9,10 +9,14 @@ import (
 	"github.com/opentdp/go-helper/onquit"
 )
 
-func Server(addr string) {
+func Server(addr string, options ...any) {
 
 	if engine == nil {
-		Engine(false)
+		if len(options) > 0 {
+			Engine(options[0].(bool))
+		} else {
+			Engine(false)
+		}
 	}
 
 	server := &http.Server{
@@ -24,10 +28,11 @@ func Server(addr string) {
 
 	onquit.Register(func() {
 		// 创建一个剩余15秒超时的上下文
-		logman.Warn("httpd will be closed, wait 15 seconds")
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		logman.Warn("httpd will close within 9 seconds")
+		ctx, cancel := context.WithTimeout(context.Background(), 9*time.Second)
 		defer cancel()
-		// 优雅地关闭服务器而不中断任何活动连接
+
+		// 优雅地关闭服务而不中断任何活动连接
 		if err := server.Shutdown(ctx); err != nil {
 			logman.Warn("httpd forced to close", "error", err)
 			server.Close()
