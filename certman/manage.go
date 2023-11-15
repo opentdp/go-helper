@@ -18,9 +18,10 @@ import (
 	"time"
 
 	"github.com/libdns/libdns"
-	"github.com/opentdp/go-helper/logman"
 	"golang.org/x/crypto/acme"
 	"golang.org/x/net/idna"
+
+	"github.com/opentdp/go-helper/logman"
 )
 
 type Manager struct {
