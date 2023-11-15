@@ -21,7 +21,7 @@ func Register(onExit func()) {
 	}
 
 	// 创建监听中断信号通道
-	quit := make(chan os.Signal, 1)
+	quit = make(chan os.Signal, 1)
 
 	// SIGTERM: `kill`
 	// SIGINT : `kill -2` 或 CTRL + C
