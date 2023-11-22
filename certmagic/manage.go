@@ -35,8 +35,10 @@ func Unmanage(domain string) {
 	domains := strings.Split(domain, ",")
 
 	if ok {
-		magic.Unmanage(domains)
 		delete(magicPool, domain)
+		for _, d := range domains {
+			magic.RevokeCert(context.Background(), d, 0, false)
+		}
 	}
 
 }
