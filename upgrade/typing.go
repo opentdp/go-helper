@@ -19,8 +19,8 @@ type UpdateInfo struct {
 }
 
 type ErrRollback struct {
-	error             // original error
-	rollbackErr error // error encountered while rolling back
+	error          // original error
+	Rollback error // error encountered while rolling back
 }
 
 var ErrNoUpdate = errors.New("no update")

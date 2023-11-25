@@ -2,156 +2,108 @@ package upgrade
 
 import (
 	"bytes"
-	"compress/gzip"
-	"encoding/json"
+	"crypto"
 	"errors"
-	"fmt"
 	"io"
-	"net/http"
 	"os"
-	"runtime"
-	"strings"
-
-	"github.com/opentdp/go-helper/request"
+	"time"
 )
 
-func CheckVersion(rq *RequesParam) (*UpdateInfo, error) {
-
-	info := &UpdateInfo{}
-
-	url := rq.Server
-	url += "?ver=" + rq.Version
-	url += "&os=" + runtime.GOOS
-	url += "&arch=" + runtime.GOARCH
-
-	body, err := request.Get(url, request.H{})
-	if err != nil {
-		return info, err
-	}
-
-	err = json.Unmarshal(body, &info)
-	if err != nil {
-		return info, err
-	}
-
-	if info.Error != "" {
-		return info, errors.New(info.Error)
-	}
-	if info.Package == "" {
-		return info, errors.New("get package url failed")
-	}
-
-	return info, nil
-
+type Updater struct {
+	// 要更新的文件的路径。默认为 '正在运行的文件'
+	TargetPath string
+	// 可执行文件的权限掩码。默认为 0755
+	TargetMode os.FileMode
+	// 要应用的新二进制文件的路径。此参数不能为空
+	NewBinary string
+	// 新二进制文件的SHA256校验和。默认不进行校验
+	Checksum []byte
 }
 
-func Downloader(url string) (io.ReadCloser, error) {
+func (u *Updater) getTarget() (string, error) {
 
-	resp, err := http.Get(url)
-
-	if err != nil {
-		return nil, fmt.Errorf("get package failed (%s)", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		defer resp.Body.Close()
-		return nil, fmt.Errorf("get package failed (http status %d)", resp.StatusCode)
-	}
-
-	if strings.HasSuffix(url, ".gz") && resp.Header.Get("Content-Encoding") != "gzip" {
-		return gzip.NewReader(resp.Body)
-	}
-
-	return resp.Body, nil
-
-}
-
-// reads the new binary content from io.Reader and performs the following actions:
-//  If configured, applies the contents of the update io.Reader as a binary patch.
-//  If configured, computes the checksum of the executable and verifies it matches.
-//  Creates a new file with the TargetMode with the contents of the updated file
-
-func PrepareBinary(update io.Reader, opts *Options) error {
-
-	// get target path
-	targetPath, err := opts.getPath()
-	if err != nil {
-		return err
-	}
-
-	var newBytes []byte
-
-	// no patch to apply, go on through
-	if newBytes, err = io.ReadAll(update); err != nil {
-		return err
-	}
-
-	// verify checksum if requested
-	if opts.Checksum != nil {
-		if err = opts.verifyChecksum(newBytes); err != nil {
-			return err
+	if u.TargetPath == "" {
+		p, err := os.Executable()
+		if err != nil {
+			return "", err
 		}
+		u.TargetPath = p
 	}
 
-	// Copy the contents of newbinary to a new executable file
-	newPath := targetPath + "-new" + opts.getTimeString()
-	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, opts.getMode())
-	if err != nil {
-		return err
-	}
-
-	defer fp.Close()
-
-	_, err = io.Copy(fp, bytes.NewReader(newBytes))
-	return err
+	return u.TargetPath, nil
 
 }
 
-// moves the new executable to the location of the current executable or opts.TargetPath
+func (u *Updater) getTargetMode() os.FileMode {
 
-func CommitBinary(opts *Options) error {
+	if u.TargetMode == 0 {
+		u.TargetMode = 0755
+	}
 
-	// get the directory the file exists in
-	targetPath, err := opts.getPath()
+	return u.TargetMode
+
+}
+
+func (u *Updater) verifyChecksum() error {
+
+	// 打开文件
+	file, err := os.Open(u.NewBinary)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
-	newPath := targetPath + "-new" + opts.getTimeString()
-	oldPath := targetPath + "-old" + opts.getTimeString()
-
-	// move the existing executable to a new file in the same directory
-	if err = os.Rename(targetPath, oldPath); err != nil {
+	// 计算校验和
+	hash := crypto.SHA256.New()
+	if _, err := io.Copy(hash, file); err != nil {
 		return err
 	}
 
-	// move the new exectuable in to become the new program
-	if err = os.Rename(newPath, targetPath); err != nil {
-		// Try to rollback by restoring the old binary to its original path.
-		if er2 := os.Rename(oldPath, targetPath); er2 != nil {
-			return &ErrRollback{err, er2}
-		}
-		return err
+	// 检查校验和
+	if !bytes.Equal(u.Checksum, hash.Sum(nil)) {
+		return errors.New("updated file has wrong checksum")
 	}
-
-	// try to remove the old binary if needed
-	os.Remove(oldPath)
 
 	return nil
 
 }
 
-// takes an error value returned by Apply and returns the error
+func (u *Updater) CommitBinary() error {
 
-func RollbackError(err error) error {
-
-	if err == nil {
-		return nil
+	// check the checksum if needed
+	if err := u.verifyChecksum(); err != nil {
+		return err
 	}
 
-	if er, ok := err.(*ErrRollback); ok {
-		return er.rollbackErr
+	// get the directory the file exists in
+	targetPath, err := u.getTarget()
+	if err != nil {
+		return err
 	}
+
+	// set the newBinary permission
+	mode := u.getTargetMode()
+	if err = os.Chmod(u.NewBinary, mode); err != nil {
+		return err
+	}
+
+	// move the existing executable to a new file in the same directory
+	originFile := targetPath + "-" + time.Now().Format("20060102150405")
+	if err = os.Rename(targetPath, originFile); err != nil {
+		return err
+	}
+
+	// move the new exectuable in to become the new program
+	if err = os.Rename(u.NewBinary, targetPath); err != nil {
+		// Try to rollback by restoring the old binary to its original path.
+		if er2 := os.Rename(originFile, targetPath); er2 != nil {
+			return ErrRollback{err, er2}
+		}
+		return err
+	}
+
+	// try to remove the old binary if needed
+	os.Remove(originFile)
 
 	return nil
 

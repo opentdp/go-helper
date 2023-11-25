@@ -1,6 +1,8 @@
 package upgrade
 
 import (
+	"encoding/json"
+	"errors"
 	"os"
 	"os/exec"
 	"runtime"
@@ -8,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/opentdp/go-helper/logman"
+	"github.com/opentdp/go-helper/request"
 )
 
 func Apply(rq *RequesParam) error {
@@ -33,32 +36,57 @@ func Apply(rq *RequesParam) error {
 
 	// download binary
 
-	updater, err := Downloader(resp.Package)
+	newFile, err := request.Download(resp.Package, true)
 	if err != nil {
 		logger.Error("download binary failed", "error", err)
 		return err
 	}
 
-	defer updater.Close()
-
 	// apply binary update
 
-	opts := &Options{}
-
-	if err = PrepareBinary(updater, opts); err != nil {
-		logger.Error("prepare binary failed", "error", err)
-		return err
+	updater := &Updater{
+		NewBinary: newFile,
 	}
 
-	if err = CommitBinary(opts); err != nil {
-		logger.Error("apply update failed", "error", err)
-		if RollbackError(err) != nil {
+	if err = updater.CommitBinary(); err != nil {
+		logger.Error("apply binary failed", "error", err)
+		if _, ok := err.(*ErrRollback); ok {
 			logger.Error("failed to rollback from bad update")
 		}
 		return err
 	}
 
 	return nil
+
+}
+
+func CheckVersion(rq *RequesParam) (*UpdateInfo, error) {
+
+	info := &UpdateInfo{}
+
+	url := rq.Server
+	url += "?ver=" + rq.Version
+	url += "&os=" + runtime.GOOS
+	url += "&arch=" + runtime.GOARCH
+
+	body, err := request.Get(url, request.H{})
+	if err != nil {
+		return info, err
+	}
+
+	err = json.Unmarshal(body, &info)
+	if err != nil {
+		return info, err
+	}
+
+	if info.Error != "" {
+		return info, errors.New(info.Error)
+	}
+	if info.Package == "" {
+		return info, errors.New("get package url failed")
+	}
+
+	return info, nil
 
 }
 
