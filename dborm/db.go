@@ -35,6 +35,16 @@ func Connect(args *Config) {
 
 }
 
+func Destroy() error {
+
+	if db, err := Db.DB(); db != nil {
+		return db.Close()
+	} else {
+		return err
+	}
+
+}
+
 func dialector(args *Config) gorm.Dialector {
 
 	switch args.Type {
