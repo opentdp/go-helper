@@ -1,9 +1,8 @@
 package logman
 
 import (
+	"log/slog"
 	"os"
-
-	"golang.org/x/exp/slog"
 )
 
 var (

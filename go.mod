@@ -3,7 +3,7 @@ module github.com/opentdp/go-helper
 go 1.21
 
 require (
-	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.5
 	github.com/alibabacloud-go/openapi-util v0.1.0
 	github.com/alibabacloud-go/tea v1.2.1
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.4
@@ -20,9 +20,8 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/shirou/gopsutil/v3 v3.23.10
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.800
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.803
 	golang.org/x/crypto v0.15.0
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/net v0.18.0
 	golang.org/x/term v0.14.0
 	golang.org/x/text v0.14.0

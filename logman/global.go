@@ -2,17 +2,17 @@ package logman
 
 import (
 	"io"
+	"log/slog"
 	"os"
 	"path"
 
-	"golang.org/x/exp/slog"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var config = &Config{}
 
 type Config struct {
-	Level    string `note:"日志级别"`
+	Level    string `note:"日志级别 DEBUG|INFO|WARN|ERROR"`
 	Target   string `note:"日志输出设备 both|file|stdout|stderr"`
 	Storage  string `note:"日志文件存储目录"`
 	Filename string `note:"默认日志文件名"`
