@@ -20,31 +20,27 @@ type Updater struct {
 	Checksum []byte
 }
 
-func (u *Updater) getTarget() (string, error) {
+func (u *Updater) Init() error {
 
 	if u.TargetPath == "" {
 		p, err := os.Executable()
 		if err != nil {
-			return "", err
+			return err
 		}
 		u.TargetPath = p
 	}
 
-	return u.TargetPath, nil
-
-}
-
-func (u *Updater) getTargetMode() os.FileMode {
+	u.NewBinary = u.TargetPath + ".new"
 
 	if u.TargetMode == 0 {
 		u.TargetMode = 0755
 	}
 
-	return u.TargetMode
+	return nil
 
 }
 
-func (u *Updater) verifyChecksum() error {
+func (u *Updater) VerifyChecksum() error {
 
 	if u.Checksum == nil {
 		return nil
@@ -75,32 +71,25 @@ func (u *Updater) verifyChecksum() error {
 func (u *Updater) CommitBinary() error {
 
 	// check the checksum if needed
-	if err := u.verifyChecksum(); err != nil {
-		return err
-	}
-
-	// get the directory the file exists in
-	targetPath, err := u.getTarget()
-	if err != nil {
+	if err := u.VerifyChecksum(); err != nil {
 		return err
 	}
 
 	// set the newBinary permission
-	mode := u.getTargetMode()
-	if err = os.Chmod(u.NewBinary, mode); err != nil {
+	if err := os.Chmod(u.NewBinary, u.TargetMode); err != nil {
 		return err
 	}
 
-	// move the existing executable to a new file in the same directory
-	originFile := targetPath + "-" + time.Now().Format("20060102150405")
-	if err = os.Rename(targetPath, originFile); err != nil {
+	// backup the old binary
+	originFile := u.TargetPath + "-" + time.Now().Format("20060102150405")
+	if err := os.Rename(u.TargetPath, originFile); err != nil {
 		return err
 	}
 
 	// move the new exectuable in to become the new program
-	if err = os.Rename(u.NewBinary, targetPath); err != nil {
+	if err := os.Rename(u.NewBinary, u.TargetPath); err != nil {
 		// Try to rollback by restoring the old binary to its original path.
-		if er2 := os.Rename(originFile, targetPath); er2 != nil {
+		if er2 := os.Rename(originFile, u.TargetPath); er2 != nil {
 			return ErrRollback{err, er2}
 		}
 		return err

@@ -9,7 +9,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 )
 
-func Download(url, target string, showProgress, isGzip bool) (string, error) {
+func Download(url, target string, isGzip bool) (string, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -21,23 +21,19 @@ func Download(url, target string, showProgress, isGzip bool) (string, error) {
 	reader := resp.Body
 
 	// 显示下载进度
-	if showProgress {
-		bar := pb.StartNew(int(resp.ContentLength))
-		bar.Set(pb.Bytes, true) //自动换为合适的字节单位
-		reader = bar.NewProxyReader(reader)
-		defer bar.Finish()
-	}
+	bar := pb.StartNew(int(resp.ContentLength))
+	bar.Set(pb.Bytes, true) //自动换为合适的单位
+	reader = bar.NewProxyReader(reader)
+	defer reader.Close()
+	defer bar.Finish()
 
-	// 自动解压缩文件
+	// 自动解压 gz 文件
 	if isGzip || resp.Header.Get("Content-Encoding") == "gzip" {
 		reader, err = gzip.NewReader(reader)
 		if err != nil {
 			return "", err
 		}
 	}
-
-	// 尝试关闭读取器
-	defer reader.Close()
 
 	// 返回文件的名称
 	return SaveStream(reader, target)

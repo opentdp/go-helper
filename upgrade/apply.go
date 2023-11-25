@@ -23,6 +23,8 @@ func Apply(rq *RequesParam) error {
 		"url", rq.Server,
 	)
 
+	// check update
+
 	resp, err := CheckVersion(rq)
 	if err != nil {
 		logger.Error("check update failed", "error", err)
@@ -34,19 +36,20 @@ func Apply(rq *RequesParam) error {
 		return ErrNoUpdate
 	}
 
+	// init updater
+
+	updater := &Updater{}
+	updater.Init()
+
 	// download binary
 
-	newFile, err := request.Download(resp.Package, true)
+	_, err = request.Download(resp.Package, updater.NewBinary, true)
 	if err != nil {
 		logger.Error("download binary failed", "error", err)
 		return err
 	}
 
 	// apply binary update
-
-	updater := &Updater{
-		NewBinary: newFile,
-	}
 
 	if err = updater.CommitBinary(); err != nil {
 		logger.Error("apply binary failed", "error", err)
