@@ -46,6 +46,10 @@ func (u *Updater) getTargetMode() os.FileMode {
 
 func (u *Updater) verifyChecksum() error {
 
+	if u.Checksum == nil {
+		return nil
+	}
+
 	// 打开文件
 	file, err := os.Open(u.NewBinary)
 	if err != nil {
