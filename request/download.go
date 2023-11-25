@@ -5,12 +5,11 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/cheggaaa/pb/v3"
 )
 
-func Download(url string, showProgress bool) (string, error) {
+func Download(url, target string, showProgress, isGzip bool) (string, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -18,10 +17,10 @@ func Download(url string, showProgress bool) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	// 默认读取器为响应体
+	// 默认读取器
 	reader := resp.Body
 
-	// 如果需要显示下载进度
+	// 显示下载进度
 	if showProgress {
 		bar := pb.StartNew(int(resp.ContentLength))
 		bar.Set(pb.Bytes, true) //自动换为合适的字节单位
@@ -29,29 +28,44 @@ func Download(url string, showProgress bool) (string, error) {
 		defer bar.Finish()
 	}
 
-	// 检查是否使用gzip压缩
-	if resp.Header.Get("Content-Encoding") == "gzip" || strings.Contains(url, ".gz") {
+	// 自动解压缩文件
+	if isGzip || resp.Header.Get("Content-Encoding") == "gzip" {
 		reader, err = gzip.NewReader(reader)
 		if err != nil {
 			return "", err
 		}
-		defer reader.Close()
 	}
 
-	// 创建临时文件
-	tempFile, err := os.CreateTemp("", "tdp-*")
+	// 尝试关闭读取器
+	defer reader.Close()
+
+	// 返回文件的名称
+	return SaveStream(reader, target)
+
+}
+
+func SaveStream(reader io.Reader, target string) (string, error) {
+
+	var err error
+	var writer *os.File
+
+	// 创建目标文件
+	if target != "" {
+		writer, err = os.Create(target)
+	} else {
+		writer, err = os.CreateTemp("", "tdp-*")
+	}
 	if err != nil {
 		return "", err
 	}
-	defer tempFile.Close()
+	defer writer.Close()
 
-	// 将下载的数据复制到临时文件
-	_, err = io.Copy(tempFile, reader)
+	// 写入文件数据
+	_, err = io.Copy(writer, reader)
 	if err != nil {
 		return "", err
 	}
 
-	// 返回临时文件的名称
-	return tempFile.Name(), nil
+	return writer.Name(), nil
 
 }
