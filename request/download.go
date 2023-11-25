@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/cheggaaa/pb/v3"
 )
@@ -29,7 +30,7 @@ func Download(url string, showProgress bool) (string, error) {
 	}
 
 	// 检查是否使用gzip压缩
-	if resp.Header.Get("Content-Encoding") == "gzip" {
+	if resp.Header.Get("Content-Encoding") == "gzip" || strings.Contains(url, ".gz") {
 		reader, err = gzip.NewReader(reader)
 		if err != nil {
 			return "", err
