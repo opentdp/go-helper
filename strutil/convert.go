@@ -1,21 +1,33 @@
 package strutil
 
 import (
+	"strconv"
 	"strings"
-
-	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
-// 转换编码 gb18030 -> utf-8
+// 字符串转为 int
 
-func Gb18030ToUtf8(s string) string {
+func ToInt(str string) int {
 
-	ret, err := simplifiedchinese.GB18030.NewDecoder().String(s)
-
-	if err == nil {
-		return string(ret)
+	v, err := strconv.Atoi(str)
+	if err != nil {
+		return 0
 	}
-	return s
+
+	return v
+
+}
+
+// 字符串转为 uint
+
+func ToUint(str string) uint {
+
+	v, err := strconv.Atoi(str)
+	if err != nil {
+		return 0
+	}
+
+	return uint(v)
 
 }
 
