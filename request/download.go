@@ -49,7 +49,7 @@ func SaveStream(reader io.Reader, target string) (string, error) {
 	if target != "" {
 		writer, err = os.Create(target)
 	} else {
-		writer, err = os.CreateTemp("", "tdp-*")
+		writer, err = os.CreateTemp("", "go-*")
 	}
 	if err != nil {
 		return "", err
