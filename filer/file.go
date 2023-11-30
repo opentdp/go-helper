@@ -29,7 +29,7 @@ func List(dir string) ([]*FileInfo, error) {
 		list = append(list, &FileInfo{
 			Name:    info.Name(),
 			Size:    info.Size(),
-			Mode:    info.Mode(),
+			Mode:    info.Mode().Perm(),
 			ModTime: info.ModTime().Unix(),
 			IsDir:   info.IsDir(),
 		})
