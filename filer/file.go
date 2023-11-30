@@ -6,10 +6,11 @@ import (
 
 type FileInfo struct {
 	Name    string
+	IsDir   bool
 	Size    int64
 	Mode    os.FileMode
 	ModTime int64
-	IsDir   bool
+	Content string
 }
 
 // 列出目录中的所有文件
@@ -28,14 +29,42 @@ func List(dir string) ([]*FileInfo, error) {
 		}
 		list = append(list, &FileInfo{
 			Name:    info.Name(),
+			IsDir:   info.IsDir(),
 			Size:    info.Size(),
 			Mode:    info.Mode().Perm(),
 			ModTime: info.ModTime().Unix(),
-			IsDir:   info.IsDir(),
 		})
 	}
 
 	return list, nil
+
+}
+
+// 获取文件信息和文本内容
+func Detail(path string, text bool) (*FileInfo, error) {
+
+	info, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	detail := &FileInfo{
+		Name:    info.Name(),
+		IsDir:   info.IsDir(),
+		Size:    info.Size(),
+		Mode:    info.Mode().Perm(),
+		ModTime: info.ModTime().Unix(),
+	}
+
+	if text && !info.IsDir() {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		detail.Content = string(content)
+	}
+
+	return detail, nil
 
 }
 
