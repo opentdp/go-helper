@@ -5,12 +5,12 @@ import (
 )
 
 type FileInfo struct {
-	Name    string
-	IsDir   bool
-	Size    int64
-	Mode    os.FileMode
-	ModTime int64
-	Content string
+	Name    string      // 文件名
+	Size    int64       // 字节大小
+	Mode    os.FileMode // 权限，如：0777
+	ModTime int64       // 修改时间，Unix时间戳
+	IsDir   bool        // 是否是目录
+	Content string      // 文本内容，仅用于文本文件
 }
 
 // 列出目录中的所有文件
@@ -29,10 +29,10 @@ func List(dir string) ([]*FileInfo, error) {
 		}
 		list = append(list, &FileInfo{
 			Name:    info.Name(),
-			IsDir:   info.IsDir(),
 			Size:    info.Size(),
 			Mode:    info.Mode().Perm(),
 			ModTime: info.ModTime().Unix(),
+			IsDir:   info.IsDir(),
 		})
 	}
 
@@ -50,10 +50,10 @@ func Detail(path string, text bool) (*FileInfo, error) {
 
 	detail := &FileInfo{
 		Name:    info.Name(),
-		IsDir:   info.IsDir(),
 		Size:    info.Size(),
 		Mode:    info.Mode().Perm(),
 		ModTime: info.ModTime().Unix(),
+		IsDir:   info.IsDir(),
 	}
 
 	if text && !info.IsDir() {
