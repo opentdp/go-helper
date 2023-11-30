@@ -2,6 +2,7 @@ package filer
 
 import (
 	"os"
+	"path/filepath"
 )
 
 type FileInfo struct {
@@ -65,6 +66,30 @@ func Detail(path string, text bool) (*FileInfo, error) {
 	}
 
 	return detail, nil
+
+}
+
+// 读取文本内容
+func Read(path string) (string, error) {
+
+	data, err := os.ReadFile(path)
+
+	return string(data), err
+
+}
+
+// 写入文本内容
+func Write(path string, content string) error {
+
+	// 创建目录
+	if dir := filepath.Dir(path); !Exists(dir) {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	// 写入内容
+	return os.WriteFile(path, []byte(content), 0644)
 
 }
 
