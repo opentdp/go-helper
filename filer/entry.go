@@ -10,6 +10,7 @@ type FileInfo struct {
 	Size    int64       // 字节大小
 	Mode    os.FileMode // 权限，如：0777
 	ModTime int64       // 修改时间，Unix时间戳
+	IsLink  bool        // 是否是链接
 	IsDir   bool        // 是否是目录
 	Data    []byte      // 文件数据
 }
@@ -33,7 +34,8 @@ func List(dir string) ([]*FileInfo, error) {
 			Size:    info.Size(),
 			Mode:    info.Mode().Perm(),
 			ModTime: info.ModTime().Unix(),
-			IsDir:   info.IsDir(),
+			IsLink:  info.Mode()&os.ModeSymlink != 0,
+			IsDir:   IsDir(filepath.Join(dir, file.Name())),
 		})
 	}
 
@@ -69,7 +71,7 @@ func Detail(path string, text bool) (*FileInfo, error) {
 
 }
 
-// 写入文件内容
+// 写入文件内容，目录不存在时自动创建
 func Write(path string, data []byte) error {
 
 	// 创建目录
@@ -81,16 +83,5 @@ func Write(path string, data []byte) error {
 
 	// 写入内容
 	return os.WriteFile(path, data, 0644)
-
-}
-
-// 判断文件是否存在
-func Exists(path string) bool {
-
-	if _, err := os.Stat(path); err != nil {
-		return !os.IsNotExist(err)
-	}
-
-	return true
 
 }
