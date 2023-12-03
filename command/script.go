@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"runtime"
 	"time"
+
+	"github.com/opentdp/go-helper/strutil"
 )
 
 func newScript(code string, ext string) (string, error) {
@@ -33,7 +35,8 @@ func newScript(code string, ext string) (string, error) {
 
 func execScript(bin string, arg []string, data *ExecPayload) (string, error) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(data.Timeout)*time.Second)
+	timeout := time.Duration(data.Timeout) * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 
 	defer cancel()
 
@@ -44,7 +47,12 @@ func execScript(bin string, arg []string, data *ExecPayload) (string, error) {
 	}
 
 	ret, err := cmd.CombinedOutput()
+	str := string(ret)
 
-	return string(ret), err
+	if runtime.GOOS == "windows" {
+		str = strutil.Gb18030ToUtf8(str)
+	}
+
+	return str, err
 
 }

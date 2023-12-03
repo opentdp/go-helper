@@ -3,9 +3,6 @@ package command
 import (
 	"errors"
 	"os"
-	"runtime"
-
-	"github.com/opentdp/go-helper/strutil"
 )
 
 type ExecPayload struct {
@@ -43,18 +40,12 @@ func Exec(data *ExecPayload) (string, error) {
 		err = errors.New("不支持此类脚本")
 	}
 
-	if err != nil {
+	if err != nil || tmp == "" {
 		return "", err
 	}
 
 	defer os.Remove(tmp)
 
-	ret, err := execScript(bin, arg, data)
-
-	if runtime.GOOS == "windows" {
-		ret = strutil.Gb18030ToUtf8(ret)
-	}
-
-	return ret, err
+	return execScript(bin, arg, data)
 
 }
