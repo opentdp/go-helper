@@ -8,9 +8,9 @@ import (
 type FileInfo struct {
 	Name    string      // 文件名
 	Size    int64       // 字节大小
-	Mode    os.FileMode // 权限，如：0777
+	Mode    os.FileMode // 权限，如 0777
 	ModTime int64       // 修改时间，Unix时间戳
-	IsLink  bool        // 是否是链接
+	Symlink string      // 链接的真实路径，软链接时有效
 	IsDir   bool        // 是否是目录
 	Data    []byte      // 文件数据
 }
@@ -29,13 +29,14 @@ func List(dir string) ([]*FileInfo, error) {
 		if err != nil {
 			return nil, err
 		}
+		fp := filepath.Join(dir, file.Name())
 		list = append(list, &FileInfo{
 			Name:    info.Name(),
 			Size:    info.Size(),
 			Mode:    info.Mode().Perm(),
 			ModTime: info.ModTime().Unix(),
-			IsLink:  info.Mode()&os.ModeSymlink != 0,
-			IsDir:   IsDir(filepath.Join(dir, file.Name())),
+			Symlink: Readlink(fp),
+			IsDir:   IsDir(fp),
 		})
 	}
 
@@ -56,7 +57,7 @@ func Detail(path string, read bool) (*FileInfo, error) {
 		Size:    info.Size(),
 		Mode:    info.Mode().Perm(),
 		ModTime: info.ModTime().Unix(),
-		IsLink:  IsLink(path),
+		Symlink: Readlink(path),
 		IsDir:   info.IsDir(),
 	}
 
@@ -75,14 +76,24 @@ func Detail(path string, read bool) (*FileInfo, error) {
 // 写入文件内容，目录不存在时自动创建
 func Write(path string, data []byte) error {
 
-	// 创建目录
 	if dir := filepath.Dir(path); !Exists(dir) {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return err
 		}
 	}
 
-	// 写入内容
 	return os.WriteFile(path, data, 0644)
+
+}
+
+// 获取软链接的真实路径
+func Readlink(path string) string {
+
+	if IsLink(path) {
+		if rp, err := os.Readlink(path); err == nil {
+			return rp
+		}
+	}
+	return ""
 
 }
