@@ -43,8 +43,8 @@ func List(dir string) ([]*FileInfo, error) {
 
 }
 
-// 获取文件信息和文本内容
-func Detail(path string, text bool) (*FileInfo, error) {
+// 获取文件信息和内容
+func Detail(path string, read bool) (*FileInfo, error) {
 
 	info, err := os.Stat(path)
 	if err != nil {
@@ -59,7 +59,7 @@ func Detail(path string, text bool) (*FileInfo, error) {
 		IsDir:   info.IsDir(),
 	}
 
-	if text && !info.IsDir() {
+	if read && !info.IsDir() {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
