@@ -56,6 +56,7 @@ func Detail(path string, read bool) (*FileInfo, error) {
 		Size:    info.Size(),
 		Mode:    info.Mode().Perm(),
 		ModTime: info.ModTime().Unix(),
+		IsLink:  IsLink(path),
 		IsDir:   info.IsDir(),
 	}
 
