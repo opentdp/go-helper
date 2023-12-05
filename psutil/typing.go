@@ -4,6 +4,19 @@ import (
 	"encoding/json"
 )
 
+// Go 内存信息
+
+type GoMemoryStat struct {
+	Alloc     uint64 `note:"已分配内存"`
+	Sys       uint64 `note:"占用内存"`
+	HeapAlloc uint64 `note:"堆内存"`
+	HeapSys   uint64 `note:"堆内存占用"`
+	LastGC    uint64 `note:"最后一次 GC 时间"`
+	NumGC     uint32 `note:"GC 次数"`
+}
+
+// 系统概要信息
+
 type SummaryStat struct {
 	CreateAt     int64     `note:"创建时间"`
 	HostId       string    `note:"主机 ID"`
@@ -21,6 +34,17 @@ type SummaryStat struct {
 	PublicIpv6   string    `note:"公网 IPV6"`
 }
 
+func (p *SummaryStat) From(s string) {
+	json.Unmarshal([]byte(s), p)
+}
+
+func (p *SummaryStat) String() string {
+	jsonbyte, _ := json.Marshal(p)
+	return string(jsonbyte)
+}
+
+// 系统统计详情
+
 type DetailStat struct {
 	*SummaryStat
 	CpuModel      []string        `note:"CPU 型号"`
@@ -34,6 +58,8 @@ type DetailStat struct {
 	SwapUsed      uint64          `note:"交换分区使用量"`
 }
 
+// 硬盘分区信息
+
 type DiskPartition struct {
 	Device     string `note:"设备名"`
 	Mountpoint string `note:"挂载点"`
@@ -41,6 +67,8 @@ type DiskPartition struct {
 	Total      uint64 `note:"总量"`
 	Used       uint64 `note:"使用量"`
 }
+
+// 网卡信息
 
 type NetInterface struct {
 	Name      string   `note:"网卡名称"`
@@ -50,13 +78,4 @@ type NetInterface struct {
 	Dropout   uint64   `note:"丢弃的发送包"`
 	Ipv4List  []string `note:"IPV4 列表"`
 	Ipv6List  []string `note:"IPV6 列表"`
-}
-
-func (p *SummaryStat) From(s string) {
-	json.Unmarshal([]byte(s), p)
-}
-
-func (p *SummaryStat) String() string {
-	jsonbyte, _ := json.Marshal(p)
-	return string(jsonbyte)
 }
