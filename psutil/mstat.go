@@ -10,12 +10,16 @@ func GoMemory() *GoMemoryStat {
 	runtime.ReadMemStats(mstat)
 
 	return &GoMemoryStat{
-		Alloc:     mstat.Alloc,
-		Sys:       mstat.Sys,
-		HeapAlloc: mstat.HeapAlloc,
-		HeapSys:   mstat.HeapSys,
-		LastGC:    uint64(mstat.LastGC / 1e9),
-		NumGC:     mstat.NumGC,
+		Alloc:      mstat.Alloc,
+		Sys:        mstat.Sys,
+		HeapAlloc:  mstat.HeapAlloc,
+		HeapInuse:  mstat.HeapInuse,
+		HeapSys:    mstat.HeapSys,
+		StackInuse: mstat.StackInuse,
+		StackSys:   mstat.StackSys,
+		TotalAlloc: mstat.TotalAlloc,
+		LastGC:     uint64(mstat.LastGC / 1e9),
+		NumGC:      mstat.NumGC,
 	}
 
 }
