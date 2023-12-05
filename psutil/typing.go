@@ -7,12 +7,16 @@ import (
 // Go 内存信息
 
 type GoMemoryStat struct {
-	Alloc     uint64 `note:"已分配内存"`
-	Sys       uint64 `note:"占用内存"`
-	HeapAlloc uint64 `note:"堆内存"`
-	HeapSys   uint64 `note:"堆内存占用"`
-	LastGC    uint64 `note:"最后一次 GC 时间"`
-	NumGC     uint32 `note:"GC 次数"`
+	Alloc      uint64 `note:"已分配内存"`
+	Sys        uint64 `note:"已申请内存"`
+	HeapAlloc  uint64 `note:"堆已分配内存"`
+	HeapInuse  uint64 `note:"堆已使用内存"`
+	HeapSys    uint64 `note:"堆已申请内存"`
+	StackInuse uint64 `note:"栈已使用内存"`
+	StackSys   uint64 `note:"栈已申请内存"`
+	TotalAlloc uint64 `note:"累计已分配内存"`
+	LastGC     uint64 `note:"最后一次 GC 时间"`
+	NumGC      uint32 `note:"GC 执行次数"`
 }
 
 // 系统概要信息
