@@ -10,10 +10,6 @@ type WsConn struct {
 	*websocket.Conn
 }
 
-func NewWsConn(ws *websocket.Conn) *WsConn {
-	return &WsConn{ws}
-}
-
 func (pod *WsConn) Read(v []byte) error {
 	return websocket.Message.Receive(pod.Conn, v)
 }

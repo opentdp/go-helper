@@ -30,8 +30,8 @@ func SetDefault(args *Config) {
 
 func NewLogger(name string) *slog.Logger {
 
+	var level slog.Level
 	var handler slog.Handler
-	var level slog.Level = 0
 
 	level.UnmarshalText([]byte(config.Level))
 
