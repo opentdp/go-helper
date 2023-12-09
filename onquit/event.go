@@ -31,7 +31,7 @@ func Register(onExit func()) {
 	// 接收到退出信号时，遍历 onExitFuncs 切片，并调用每个函数
 	go func() {
 		<-quit
-		logman.Warn("exiting...")
+		logman.Warn("app exiting ...")
 		for _, fn := range onQuitFuncs {
 			fn()
 		}
