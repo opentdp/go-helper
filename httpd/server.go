@@ -41,7 +41,7 @@ func Server(addr string, options ...any) {
 		}
 	})
 
-	logman.Info("httpd starting", "address", addr)
+	logman.Info("httpd start", "address", addr)
 	if err := server.ListenAndServe(); err != nil {
 		logman.Warn(err.Error())
 	}
