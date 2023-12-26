@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"os"
+	"strings"
 )
 
 type ExecPayload struct {
@@ -33,9 +34,15 @@ func Exec(data *ExecPayload) (string, error) {
 		arg = []string{"-File", tmp}
 		bin = "powershell.exe"
 	case "SHELL":
-		tmp, err = newScript(data.Content, "")
-		arg = []string{}
-		bin = tmp
+		if strings.HasPrefix(data.Content, "#!/") {
+			arg = []string{"-c", data.Content}
+			bin = "sh"
+			tmp = "-"
+		} else {
+			tmp, err = newScript(data.Content, "")
+			arg = []string{}
+			bin = tmp
+		}
 	default:
 		err = errors.New("不支持此类脚本")
 	}
@@ -44,7 +51,9 @@ func Exec(data *ExecPayload) (string, error) {
 		return "", err
 	}
 
-	defer os.Remove(tmp)
+	if tmp != "-" {
+		defer os.Remove(tmp)
+	}
 
 	return execScript(bin, arg, data)
 
