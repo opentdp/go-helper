@@ -35,13 +35,13 @@ func Exec(data *ExecPayload) (string, error) {
 		bin = "powershell.exe"
 	case "SHELL":
 		if strings.HasPrefix(data.Content, "#!/") {
-			arg = []string{"-c", data.Content}
-			bin = "sh"
-			tmp = "-"
-		} else {
 			tmp, err = newScript(data.Content, "")
 			arg = []string{}
 			bin = tmp
+		} else {
+			arg = []string{"-c", data.Content}
+			bin = "sh"
+			tmp = "-"
 		}
 	default:
 		err = errors.New("不支持此类脚本")
