@@ -14,7 +14,7 @@ import (
 
 func newScript(code string, ext string) (string, error) {
 
-	tf, err := os.CreateTemp("", "run-*."+ext)
+	tf, err := os.CreateTemp("", "tmp-*"+ext)
 
 	if err != nil {
 		return "", errors.New("创建临时文件失败")

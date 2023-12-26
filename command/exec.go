@@ -25,15 +25,15 @@ func Exec(data *ExecPayload) (string, error) {
 
 	switch data.CommandType {
 	case "BAT":
-		tmp, err = newScript(data.Content, "bat")
+		tmp, err = newScript(data.Content, ".bat")
 		arg = []string{"/c", "CALL", tmp}
 		bin = "cmd.exe"
 	case "POWERSHELL":
-		tmp, err = newScript(data.Content, "ps1")
+		tmp, err = newScript(data.Content, ".ps1")
 		arg = []string{"-File", tmp}
 		bin = "powershell.exe"
 	case "SHELL":
-		tmp, err = newScript(data.Content, "sh")
+		tmp, err = newScript(data.Content, "")
 		arg = []string{}
 		bin = tmp
 	default:
