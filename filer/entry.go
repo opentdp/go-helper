@@ -11,6 +11,8 @@ type FileInfo struct {
 	Mode    os.FileMode // 权限，如 0777
 	ModTime int64       // 修改时间，Unix时间戳
 	Symlink string      // 链接的真实路径，软链接时有效
+	Owner   string      // 所属用户
+	Group   string      // 所属组
 	IsDir   bool        // 是否是目录
 	Data    []byte      // 文件数据
 }
@@ -30,6 +32,7 @@ func List(dir string) ([]*FileInfo, error) {
 			return nil, err
 		}
 		fp := filepath.Join(dir, file.Name())
+		uName, gName, _ := getFileOwner(info)
 		list = append(list, &FileInfo{
 			Name:    info.Name(),
 			Size:    info.Size(),
@@ -37,6 +40,8 @@ func List(dir string) ([]*FileInfo, error) {
 			ModTime: info.ModTime().Unix(),
 			Symlink: Readlink(fp),
 			IsDir:   IsDir(fp),
+			Owner:   uName,
+			Group:   gName,
 		})
 	}
 
@@ -52,6 +57,7 @@ func Detail(path string, read bool) (*FileInfo, error) {
 		return nil, err
 	}
 
+	uName, gName, _ := getFileOwner(info)
 	detail := &FileInfo{
 		Name:    info.Name(),
 		Size:    info.Size(),
@@ -59,6 +65,8 @@ func Detail(path string, read bool) (*FileInfo, error) {
 		ModTime: info.ModTime().Unix(),
 		Symlink: Readlink(path),
 		IsDir:   info.IsDir(),
+		Owner:   uName,
+		Group:   gName,
 	}
 
 	if read && !info.IsDir() {
