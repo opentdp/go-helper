@@ -13,7 +13,7 @@ var config = &Config{}
 
 type Config struct {
 	Level    string `note:"日志级别 DEBUG|INFO|WARN|ERROR"`
-	Target   string `note:"日志输出设备 both|file|stdout|stderr"`
+	Target   string `note:"日志输出设备 both|file|null|stdout|stderr"`
 	Storage  string `note:"日志文件存储目录"`
 	Filename string `note:"默认日志文件名"`
 }
@@ -53,6 +53,8 @@ func AutoWriter(name string) io.Writer {
 		return FileWriter(name)
 	case "both":
 		return io.MultiWriter(os.Stdout, FileWriter(name))
+	case "null":
+		return io.Discard
 	case "stderr":
 		return os.Stderr
 	default:
