@@ -8,12 +8,19 @@ import (
 )
 
 // 释放 embed.FS
-func ReleaseEmbedFS(efs embed.FS, root string) (string, error) {
+func ReleaseEmbedFS(efs embed.FS, root string, args ...string) (string, error) {
+
+	pattern := "efs-*"
+	if len(args) > 0 {
+		pattern = args[0]
+	}
+
 	// 创建临时目录
-	tempDir, err := os.MkdirTemp("", "wrest-*")
+	tempDir, err := os.MkdirTemp("", pattern)
 	if err != nil {
 		return "", err
 	}
+
 	// 递归复制目录内容
 	err = fs.WalkDir(efs, root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -36,11 +43,14 @@ func ReleaseEmbedFS(efs embed.FS, root string) (string, error) {
 		}
 		return os.WriteFile(targetPath, data, d.Type().Perm())
 	})
+
 	// 出错时清理临时目录
 	if err != nil {
 		os.RemoveAll(tempDir)
 		return "", err
 	}
+
 	// 返回临时目录的路径
 	return tempDir, nil
+
 }
