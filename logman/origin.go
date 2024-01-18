@@ -3,6 +3,8 @@ package logman
 import (
 	"log/slog"
 	"os"
+
+	"github.com/opentdp/go-helper/onquit"
 )
 
 var (
@@ -13,6 +15,8 @@ var (
 )
 
 func Fatal(msg string, args ...any) {
+
+	onquit.CallQuitFuncs() // 调用所有退出函数
 
 	Error(msg, args...)
 	os.Exit(1)

@@ -4,13 +4,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/opentdp/go-helper/logman"
 )
 
 var quit chan os.Signal
 var onQuitFuncs []func()
 
+// 注册退出时的回调函数
 func Register(onExit func()) {
 
 	onQuitFuncs = append(onQuitFuncs, onExit)
@@ -28,14 +27,20 @@ func Register(onExit func()) {
 	// SIGKILL: `kill -9`，无法捕获，故而不做处理
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
-	// 接收到退出信号时，遍历 onExitFuncs 切片，并调用每个函数
+	// 等待退出信号
 	go func() {
 		<-quit
-		logman.Warn("app exiting ...")
-		for _, fn := range onQuitFuncs {
-			fn()
-		}
-		os.Exit(0)
+		CallQuitFuncs()
+		os.Exit(0) // 退出
 	}()
+
+}
+
+// 调用所有退出函数
+func CallQuitFuncs() {
+
+	for _, fn := range onQuitFuncs {
+		fn()
+	}
 
 }

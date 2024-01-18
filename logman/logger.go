@@ -4,6 +4,8 @@ import (
 	"context"
 	"log/slog"
 	"os"
+
+	"github.com/opentdp/go-helper/onquit"
 )
 
 type Logger struct {
@@ -52,6 +54,8 @@ func (l *Logger) Error(msg string, args ...any) {
 }
 
 func (l *Logger) Fatal(msg string, args ...any) {
+
+	onquit.CallQuitFuncs() // 调用所有退出函数
 
 	l.log(slog.LevelError, msg, args...)
 	os.Exit(1)
