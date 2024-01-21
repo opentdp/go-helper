@@ -26,7 +26,7 @@ func (dc *DockerClient) ImagePull(rq *ImagePullParam) (io.ReadCloser, error) {
 	option := types.ImagePullOptions{}
 
 	if rq.Username != "" {
-		authConfig, _ := json.Marshal(types.AuthConfig{
+		authConfig, _ := json.Marshal(registry.AuthConfig{
 			Username: rq.Username,
 			Password: rq.Password,
 		})
@@ -39,7 +39,7 @@ func (dc *DockerClient) ImagePull(rq *ImagePullParam) (io.ReadCloser, error) {
 
 // 列出镜像
 
-func (dc *DockerClient) ImageList() ([]types.ImageSummary, error) {
+func (dc *DockerClient) ImageList() ([]image.Summary, error) {
 
 	ctx := context.Background()
 

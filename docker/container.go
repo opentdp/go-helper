@@ -42,7 +42,7 @@ func (dc *DockerClient) ContainerList() ([]types.Container, error) {
 
 	ctx := context.Background()
 
-	containers, err := dc.Client.ContainerList(ctx, types.ContainerListOptions{})
+	containers, err := dc.Client.ContainerList(ctx, container.ListOptions{})
 	return containers, err
 
 }
@@ -53,7 +53,7 @@ func (dc *DockerClient) ContainerSearch(containerName string) ([]types.Container
 
 	ctx := context.Background()
 
-	containers, err := dc.Client.ContainerList(ctx, types.ContainerListOptions{
+	containers, err := dc.Client.ContainerList(ctx, container.ListOptions{
 		Filters: filters.NewArgs(
 			filters.Arg("name", containerName),
 		),
@@ -68,7 +68,7 @@ func (dc *DockerClient) ContainerRemove(containerID string) error {
 
 	ctx := context.Background()
 
-	return dc.Client.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{})
+	return dc.Client.ContainerRemove(ctx, containerID, container.RemoveOptions{})
 
 }
 
@@ -78,7 +78,7 @@ func (dc *DockerClient) ContainerStart(containerID string) error {
 
 	ctx := context.Background()
 
-	return dc.Client.ContainerStart(ctx, containerID, types.ContainerStartOptions{})
+	return dc.Client.ContainerStart(ctx, containerID, container.StartOptions{})
 
 }
 
@@ -98,7 +98,7 @@ func (dc *DockerClient) ContainerLogs(containerID string) (io.ReadCloser, error)
 
 	ctx := context.Background()
 
-	return dc.Client.ContainerLogs(ctx, containerID, types.ContainerLogsOptions{
+	return dc.Client.ContainerLogs(ctx, containerID, container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 	})
@@ -141,7 +141,7 @@ func (dc *DockerClient) ContainerAttach(containerID string) (types.HijackedRespo
 
 	ctx := context.Background()
 
-	return dc.Client.ContainerAttach(ctx, containerID, types.ContainerAttachOptions{
+	return dc.Client.ContainerAttach(ctx, containerID, container.AttachOptions{
 		Stream: true,
 		Stdin:  true,
 		Stdout: true,

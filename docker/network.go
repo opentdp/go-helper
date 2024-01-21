@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 )
 
@@ -95,7 +96,7 @@ func (dc *DockerClient) NetworkSearchContainer(networkID string) ([]types.Contai
 
 	ctx := context.Background()
 
-	containers, err := dc.Client.ContainerList(ctx, types.ContainerListOptions{
+	containers, err := dc.Client.ContainerList(ctx, container.ListOptions{
 		Filters: filters.NewArgs(
 			filters.Arg("network", networkID),
 		),
