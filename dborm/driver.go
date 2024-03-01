@@ -1,6 +1,9 @@
 package dborm
 
 import (
+	"path"
+	"path/filepath"
+
 	"github.com/glebarez/sqlite"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -9,8 +12,11 @@ import (
 func useSqlite(args *Config) gorm.Dialector {
 
 	dbname := args.DbName
-	option := args.Option
+	if args.Host != "" && !filepath.IsAbs(args.DbName) {
+		dbname = path.Join(args.Host, dbname)
+	}
 
+	option := args.Option
 	if option == "" {
 		option = "?_pragma=busy_timeout=5000&_pragma=journa_mode(WAL)"
 	}
