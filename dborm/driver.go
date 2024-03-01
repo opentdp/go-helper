@@ -1,6 +1,7 @@
 package dborm
 
 import (
+	"os"
 	"path"
 	"path/filepath"
 
@@ -20,6 +21,8 @@ func useSqlite(args *Config) gorm.Dialector {
 	if option == "" {
 		option = "?_pragma=busy_timeout=5000&_pragma=journa_mode(WAL)"
 	}
+
+	os.MkdirAll(filepath.Dir(dbname), 0755)
 
 	return sqlite.Open(dbname + option)
 
