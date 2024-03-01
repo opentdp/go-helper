@@ -12,7 +12,7 @@ import (
 var config = &Config{}
 
 type Config struct {
-	Level    string `note:"日志级别 DEBUG|INFO|WARN|ERROR"`
+	Level    string `note:"日志级别 debug|info|warn|error"`
 	Target   string `note:"日志输出设备 both|file|null|stdout|stderr"`
 	Storage  string `note:"日志文件存储目录"`
 	Filename string `note:"默认日志文件名"`
@@ -25,6 +25,10 @@ func SetDefault(args *Config) {
 	config.Storage = args.Storage
 
 	slog.SetDefault(NewLogger(args.Filename))
+
+	if config.Storage != "" && config.Storage != "." {
+		os.MkdirAll(config.Storage, 0755)
+	}
 
 }
 
