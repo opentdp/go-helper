@@ -5,9 +5,9 @@ import (
 )
 
 // 判断是否目录
-func IsDir(path string) bool {
+func IsDir(p string) bool {
 
-	info, err := os.Stat(path)
+	info, err := os.Stat(p)
 	if err != nil {
 		return false
 	}
@@ -17,9 +17,9 @@ func IsDir(path string) bool {
 }
 
 // 判断是否链接
-func IsLink(path string) bool {
+func IsLink(p string) bool {
 
-	info, err := os.Lstat(path)
+	info, err := os.Lstat(p)
 	if err != nil {
 		return false
 	}
@@ -29,9 +29,9 @@ func IsLink(path string) bool {
 }
 
 // 判断文件是否存在
-func Exists(path string) bool {
+func Exists(p string) bool {
 
-	if _, err := os.Stat(path); err != nil {
+	if _, err := os.Stat(p); err != nil {
 		return !os.IsNotExist(err)
 	}
 

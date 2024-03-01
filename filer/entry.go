@@ -50,9 +50,9 @@ func List(dir string) ([]*FileInfo, error) {
 }
 
 // 获取文件信息和内容
-func Detail(path string, read bool) (*FileInfo, error) {
+func Detail(file string, read bool) (*FileInfo, error) {
 
-	info, err := os.Stat(path)
+	info, err := os.Stat(file)
 	if err != nil {
 		return nil, err
 	}
@@ -63,14 +63,14 @@ func Detail(path string, read bool) (*FileInfo, error) {
 		Size:    info.Size(),
 		Mode:    info.Mode().Perm(),
 		ModTime: info.ModTime().Unix(),
-		Symlink: Readlink(path),
+		Symlink: Readlink(file),
 		IsDir:   info.IsDir(),
 		Owner:   uName,
 		Group:   gName,
 	}
 
 	if read && !info.IsDir() {
-		data, err := os.ReadFile(path)
+		data, err := os.ReadFile(file)
 		if err != nil {
 			return nil, err
 		}
@@ -82,23 +82,23 @@ func Detail(path string, read bool) (*FileInfo, error) {
 }
 
 // 写入文件内容，目录不存在时自动创建
-func Write(path string, data []byte) error {
+func Write(file string, data []byte) error {
 
-	if dir := filepath.Dir(path); !Exists(dir) {
+	if dir := filepath.Dir(file); !Exists(dir) {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return err
 		}
 	}
 
-	return os.WriteFile(path, data, 0644)
+	return os.WriteFile(file, data, 0644)
 
 }
 
 // 获取软链接的真实路径
-func Readlink(path string) string {
+func Readlink(file string) string {
 
-	if IsLink(path) {
-		if rp, err := os.Readlink(path); err == nil {
+	if IsLink(file) {
+		if rp, err := os.Readlink(file); err == nil {
 			return rp
 		}
 	}
