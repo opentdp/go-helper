@@ -67,7 +67,7 @@ func execScript(bin string, arg []string, data *ExecPayload) (string, error) {
 	str := string(ret)
 
 	// 转换文本编码
-	if runtime.GOOS == "windows" {
+	if data.Gb18030ToUtf8 {
 		str = strutil.Gb18030ToUtf8(str)
 	}
 
