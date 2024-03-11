@@ -11,7 +11,7 @@ type Client struct {
 	ApiVersion     string
 	ApiKey         string
 	Model          string
-	SafetySettings []*SafetySetting
+	SafetySettings []SafetySetting
 }
 
 func NewClient(key string) *Client {
@@ -25,7 +25,7 @@ func NewClient(key string) *Client {
 
 }
 
-func (c *Client) CreateChatCompletion(contents []*Content) (*ResponseBody, error) {
+func (c *Client) CreateChatCompletion(contents []Content) (*ResponseBody, error) {
 
 	rq := &RequestBody{
 		Contents:       contents,
@@ -51,7 +51,7 @@ func (c *Client) CreateChatCompletion(contents []*Content) (*ResponseBody, error
 
 }
 
-func (c *Client) CreateImageCompletion(contents []*Content) (*ResponseBody, error) {
+func (c *Client) CreateImageCompletion(contents []Content) (*ResponseBody, error) {
 
 	rq := &RequestBody{
 		Contents:       contents,

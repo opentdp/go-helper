@@ -6,6 +6,7 @@ const ApiBaseUrl = "https://dashscope.aliyuncs.com"
 const ApiVersion = "v1"
 
 const ChatMessageRoleAssistant = "assistant"
+const ChatMessageRoleSystem = "system"
 const ChatMessageRoleUser = "user"
 
 // request
