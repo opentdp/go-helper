@@ -40,7 +40,7 @@ func (c *Client) Request() ([]byte, error) {
 		req.Header.Set(k, v)
 	}
 
-	logman.Info("http request", "method", c.Method, "url", c.Url)
+	logman.Debug("http request", "method", c.Method, "url", c.Url, "data", c.Data)
 
 	// 发起请求
 	client := http.Client{Timeout: c.Timeout}
