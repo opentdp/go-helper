@@ -6,11 +6,13 @@ import (
 	"github.com/opentdp/go-helper/request"
 )
 
-const ApiBaseUrl = "https://generativelanguage.googleapis.com"
-const ApiVersion = "v1beta"
-
-const ChatMessageRoleAssistant = "model"
-const ChatMessageRoleUser = "user"
+type Client struct {
+	ApiBaseUrl     string
+	ApiVersion     string
+	ApiKey         string
+	Model          string
+	SafetySettings []*SafetySetting
+}
 
 func NewClient(key string) *Client {
 
@@ -23,9 +25,14 @@ func NewClient(key string) *Client {
 
 }
 
-func (c *Client) CreateChatCompletion(rq *RequestBody) (*ResponseBody, error) {
+func (c *Client) CreateChatCompletion(contents []*Content) (*ResponseBody, error) {
 
+	rq := &RequestBody{
+		Contents:       contents,
+		SafetySettings: c.SafetySettings,
+	}
 	body, _ := json.Marshal(rq)
+
 	heaner := request.H{
 		"Content-Type":   "application/json",
 		"x-goog-api-key": c.ApiKey,
@@ -44,9 +51,14 @@ func (c *Client) CreateChatCompletion(rq *RequestBody) (*ResponseBody, error) {
 
 }
 
-func (c *Client) CreateImageCompletion(rq *RequestBody) (*ResponseBody, error) {
+func (c *Client) CreateImageCompletion(contents []*Content) (*ResponseBody, error) {
 
+	rq := &RequestBody{
+		Contents:       contents,
+		SafetySettings: c.SafetySettings,
+	}
 	body, _ := json.Marshal(rq)
+
 	heaner := request.H{
 		"Content-Type":   "application/json",
 		"x-goog-api-key": c.ApiKey,

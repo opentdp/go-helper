@@ -1,11 +1,12 @@
 package googai
 
-type Client struct {
-	ApiBaseUrl string
-	ApiVersion string
-	ApiKey     string
-	Model      string
-}
+// 申请地址 https://aistudio.google.com/app/apikey?hl=zh-cn
+
+const ApiBaseUrl = "https://generativelanguage.googleapis.com"
+const ApiVersion = "v1beta"
+
+const ChatMessageRoleAssistant = "model"
+const ChatMessageRoleUser = "user"
 
 // request
 
