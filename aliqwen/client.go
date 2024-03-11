@@ -11,7 +11,7 @@ type Client struct {
 	ApiVersion string
 	ApiKey     string
 	Model      string
-	Params     Parameters
+	Params     *Parameters
 }
 
 func NewClient(key string) *Client {
@@ -21,12 +21,12 @@ func NewClient(key string) *Client {
 		ApiVersion: ApiVersion,
 		ApiKey:     key,
 		Model:      "qwen-max",
-		Params:     Parameters{EnableSearch: true},
+		Params:     &Parameters{EnableSearch: true},
 	}
 
 }
 
-func (c *Client) CreateChatCompletion(messages []Messages) (*ResponseBody, error) {
+func (c *Client) CreateChatCompletion(messages []*Messages) (*ResponseBody, error) {
 
 	req := RequestBody{
 		Model:      c.Model,

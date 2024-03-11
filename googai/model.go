@@ -12,18 +12,18 @@ const ChatMessageRoleUser = "user"
 // request
 
 type RequestBody struct {
-	Contents       []Content       `json:"contents"`
-	SafetySettings []SafetySetting `json:"safetySettings"`
+	Contents       []*Content       `json:"contents"`
+	SafetySettings []*SafetySetting `json:"safetySettings"`
 }
 
 type Content struct {
-	Parts []Part `json:"parts"`
-	Role  string `json:"role,omitempty"`
+	Parts []*Part `json:"parts"`
+	Role  string  `json:"role,omitempty"`
 }
 
 type Part struct {
-	Text       string     `json:"text,omitempty"`
-	InlineData InlineData `json:"inline_data,omitempty"`
+	Text       string      `json:"text,omitempty"`
+	InlineData *InlineData `json:"inline_data,omitempty"`
 }
 
 type InlineData struct {
@@ -39,19 +39,19 @@ type SafetySetting struct {
 // response
 
 type ResponseBody struct {
-	Candidates     []Candidate `json:"candidates"`
-	Error          Error       `json:"error"`
+	Candidates     []*Candidate `json:"candidates"`
+	Error          *Error       `json:"error"`
 	PromptFeedback struct {
-		BlockReason   string         `json:"blockReason"`
-		SafetyRatings []SafetyRating `json:"safetyRatings"`
+		BlockReason   string          `json:"blockReason"`
+		SafetyRatings []*SafetyRating `json:"safetyRatings"`
 	} `json:"promptFeedback"`
 }
 
 type Candidate struct {
-	Content       Content        `json:"content"`
-	FinishReason  string         `json:"finishReason"`
-	Index         int            `json:"index"`
-	SafetyRatings []SafetyRating `json:"safetyRatings"`
+	Content       *Content        `json:"content"`
+	FinishReason  string          `json:"finishReason"`
+	Index         int             `json:"index"`
+	SafetyRatings []*SafetyRating `json:"safetyRatings"`
 }
 
 type SafetyRating struct {

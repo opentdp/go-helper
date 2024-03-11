@@ -11,7 +11,7 @@ type Client struct {
 	ApiVersion     string
 	ApiKey         string
 	Model          string
-	SafetySettings []SafetySetting
+	SafetySettings []*SafetySetting
 }
 
 func NewClient(key string) *Client {
@@ -25,13 +25,12 @@ func NewClient(key string) *Client {
 
 }
 
-func (c *Client) CreateChatCompletion(contents []Content) (*ResponseBody, error) {
+func (c *Client) CreateChatCompletion(contents []*Content) (*ResponseBody, error) {
 
-	rq := &RequestBody{
+	query := &RequestBody{
 		Contents:       contents,
 		SafetySettings: c.SafetySettings,
 	}
-	body, _ := json.Marshal(rq)
 
 	heaner := request.H{
 		"Content-Type":   "application/json",
@@ -39,7 +38,7 @@ func (c *Client) CreateChatCompletion(contents []Content) (*ResponseBody, error)
 	}
 
 	url := c.ApiBaseUrl + "/" + c.ApiVersion + "/models/" + c.Model + ":generateContent"
-	response, err := request.Post(url, string(body), heaner)
+	response, err := request.JsonPost(url, query, heaner)
 	if err != nil {
 		return nil, err
 	}
@@ -51,13 +50,12 @@ func (c *Client) CreateChatCompletion(contents []Content) (*ResponseBody, error)
 
 }
 
-func (c *Client) CreateImageCompletion(contents []Content) (*ResponseBody, error) {
+func (c *Client) CreateImageCompletion(contents []*Content) (*ResponseBody, error) {
 
-	rq := &RequestBody{
+	query := &RequestBody{
 		Contents:       contents,
 		SafetySettings: c.SafetySettings,
 	}
-	body, _ := json.Marshal(rq)
 
 	heaner := request.H{
 		"Content-Type":   "application/json",
@@ -65,7 +63,7 @@ func (c *Client) CreateImageCompletion(contents []Content) (*ResponseBody, error
 	}
 
 	url := c.ApiBaseUrl + "/" + c.ApiVersion + "/models/gemini-pro-vision:generateContent"
-	response, err := request.Post(url, string(body), heaner)
+	response, err := request.JsonPost(url, query, heaner)
 	if err != nil {
 		return nil, err
 	}

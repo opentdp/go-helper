@@ -12,13 +12,13 @@ const ChatMessageRoleUser = "user"
 // request
 
 type RequestBody struct {
-	Model      string     `json:"model"`
-	Input      Input      `json:"input"`
-	Parameters Parameters `json:"parameters"`
+	Model      string      `json:"model"`
+	Input      Input       `json:"input"`
+	Parameters *Parameters `json:"parameters"`
 }
 
 type Input struct {
-	Messages []Messages `json:"messages"`
+	Messages []*Messages `json:"messages"`
 }
 
 type Parameters struct {
