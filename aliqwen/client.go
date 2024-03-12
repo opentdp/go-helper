@@ -28,12 +28,11 @@ func NewClient(key string) *Client {
 
 func (c *Client) CreateChatCompletion(messages []*Messages) (*ResponseBody, error) {
 
-	req := RequestBody{
+	query := RequestBody{
 		Model:      c.Model,
 		Input:      Input{messages},
 		Parameters: c.Params,
 	}
-	body, _ := json.Marshal(req)
 
 	heaner := request.H{
 		"Content-Type":  "application/json",
@@ -41,7 +40,7 @@ func (c *Client) CreateChatCompletion(messages []*Messages) (*ResponseBody, erro
 	}
 
 	url := c.ApiBaseUrl + "/api/" + c.ApiVersion + "/services/aigc/text-generation/generation"
-	response, err := request.Post(url, string(body), heaner)
+	response, err := request.JsonPost(url, query, heaner)
 	if err != nil {
 		return nil, err
 	}

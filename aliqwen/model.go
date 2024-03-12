@@ -33,6 +33,8 @@ type Messages struct {
 // response
 
 type ResponseBody struct {
+	Code      string `json:"code"`
+	Message   string `json:"message"`
 	Output    Output `json:"output"`
 	Usage     Usage  `json:"usage"`
 	RequestID string `json:"request_id"`
