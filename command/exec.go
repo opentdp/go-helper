@@ -44,6 +44,9 @@ func Exec(data *ExecPayload) (string, error) {
 			bin = "sh"
 			tmp = "-"
 		}
+	case "EXEC":
+		arg = strings.Fields(data.Content)
+		bin, arg = arg[0], arg[1:]
 	default:
 		err = errors.New("不支持此类脚本")
 	}
