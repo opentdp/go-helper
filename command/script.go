@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/opentdp/go-helper/logman"
 	"github.com/opentdp/go-helper/strutil"
 )
 
@@ -47,6 +48,8 @@ func newScript(code string, ext string) (string, error) {
 }
 
 func execScript(bin string, arg []string, data *ExecPayload) (string, error) {
+
+	logman.Debug("执行应用程序", "bin", bin, "arg", arg)
 
 	// 超时时间
 	timeout := time.Duration(data.Timeout) * time.Second
