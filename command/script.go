@@ -52,11 +52,16 @@ func execScript(bin string, arg []string, data *ExecPayload) (string, error) {
 
 	logman.Debug("执行应用程序", "bin", bin, "arg", arg)
 
-	// 超时时间
-	timeout := time.Duration(data.Timeout) * time.Second
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	// 上下文
+	ctx := context.Background()
 
-	defer cancel()
+	// 超时时间
+	if data.Timeout > 0 {
+		var cancel context.CancelFunc
+		timeout := time.Duration(data.Timeout) * time.Second
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
 
 	// 运行脚本文件
 	cmd := exec.CommandContext(ctx, bin, arg...)
