@@ -18,7 +18,7 @@ type Config struct {
 	Option   string `note:"数据库选项"`
 }
 
-func Connect(args *Config) {
+func Connect(args *Config) *gorm.DB {
 
 	config := &gorm.Config{
 		Logger: NewLogger(),
@@ -32,6 +32,8 @@ func Connect(args *Config) {
 	} else {
 		Db = db
 	}
+
+	return Db
 
 }
 
