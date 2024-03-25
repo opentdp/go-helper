@@ -17,7 +17,7 @@ type TimedCache struct {
 	items    map[string]CacheItem
 }
 
-func NewCache(interval time.Duration) *TimedCache {
+func NewTimedCache(interval time.Duration) *TimedCache {
 	cache := &TimedCache{
 		interval: interval,
 		stopChan: make(chan struct{}),
