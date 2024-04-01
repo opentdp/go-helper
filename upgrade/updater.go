@@ -2,25 +2,36 @@ package upgrade
 
 import (
 	"bytes"
-	"crypto"
+	"crypto/sha256"
 	"errors"
 	"io"
 	"os"
-	"time"
 )
 
 type Updater struct {
+	// 新版本。默认为 'new'
+	NewVersion string
+	// 旧版本。默认为 'old'
+	OldVersion string
 	// 要更新的文件的路径。默认为 '正在运行的文件'
 	TargetPath string
 	// 可执行文件的权限掩码。默认为 0755
 	TargetMode os.FileMode
-	// 要应用的新二进制文件的路径。此参数不能为空
+	// 要应用的新文件的路径，必须为可执行文件
 	NewBinary string
 	// 新二进制文件的SHA256校验和。默认不进行校验
 	Checksum []byte
 }
 
 func (u *Updater) Init() error {
+
+	if u.NewVersion == "" {
+		u.NewVersion = "new"
+	}
+
+	if u.OldVersion == "" {
+		u.OldVersion = "old"
+	}
 
 	if u.TargetPath == "" {
 		p, err := os.Executable()
@@ -30,11 +41,11 @@ func (u *Updater) Init() error {
 		u.TargetPath = p
 	}
 
-	u.NewBinary = u.TargetPath + ".new"
-
 	if u.TargetMode == 0 {
 		u.TargetMode = 0755
 	}
+
+	u.NewBinary = u.TargetPath + "-" + u.NewVersion
 
 	return nil
 
@@ -54,7 +65,7 @@ func (u *Updater) VerifyChecksum() error {
 	defer file.Close()
 
 	// 计算校验和
-	hash := crypto.SHA256.New()
+	hash := sha256.New()
 	if _, err := io.Copy(hash, file); err != nil {
 		return err
 	}
@@ -81,7 +92,7 @@ func (u *Updater) CommitBinary() error {
 	}
 
 	// backup the old binary
-	originFile := u.TargetPath + "-" + time.Now().Format("20060102150405")
+	originFile := u.TargetPath + "-" + u.OldVersion
 	if err := os.Rename(u.TargetPath, originFile); err != nil {
 		return err
 	}

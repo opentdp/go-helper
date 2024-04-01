@@ -38,7 +38,7 @@ func Apply(rq *RequesParam) error {
 
 	// init updater
 
-	updater := &Updater{}
+	updater := &Updater{OldVersion: rq.Version, NewVersion: resp.Version}
 	updater.Init()
 
 	// download binary
